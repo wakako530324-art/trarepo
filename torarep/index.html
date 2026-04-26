@@ -1,0 +1,1778 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>トラレポ</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+:root{
+  --pr:#1a3a8c;--pr2:#1e4aad;--pr3:#2560cc;
+  --ac:#e8c020;
+  --bl:#e8f0fb;--bm:#c5d8f8;--bp:#f0f5ff;
+  --tx:#1a2540;--tx2:#4a5e80;--tx3:#8a9bba;
+  --bg:#f4f7fc;--wh:#fff;
+  --bd:#d0daf0;--bd2:#e4ecfa;
+  --gn:#1a7a42;--gnb:#eaf6ee;
+  --rd:#c0392b;--rdb:#fdf0ef;
+  --am:#b87a10;--amb:#fdf6e3;
+  --gy:#6b7280;--gyb:#f3f4f6;
+  --r:10px;
+}
+body{font-family:'Meiryo','Yu Gothic',system-ui,sans-serif;background:var(--bg);color:var(--tx);font-size:13px;min-height:100vh;}
+
+/* ════════════════════════════════
+   SHARED UTILITIES
+════════════════════════════════ */
+.hidden{display:none!important;}
+.pill{display:inline-flex;padding:2px 7px;border-radius:8px;font-size:9px;font-weight:700;white-space:nowrap;}
+.pg{background:var(--gnb);color:var(--gn);}
+.pa{background:var(--amb);color:var(--am);}
+.pr2{background:var(--rdb);color:var(--rd);}
+.pb{background:var(--bl);color:var(--pr);}
+.pgy{background:var(--gyb);color:var(--gy);}
+.btn{padding:7px 14px;border-radius:6px;border:none;cursor:pointer;font-size:12px;font-weight:500;font-family:inherit;transition:.15s;}
+.bp{background:var(--pr);color:#fff;}.bp:hover{background:var(--pr2);}
+.bg2{background:var(--wh);color:var(--pr);border:1px solid var(--bd);}.bg2:hover{background:var(--bl);}
+.bsm{padding:3px 9px;font-size:10px;}
+.bdng{background:var(--rdb);color:var(--rd);border:1px solid #f0bab5;}
+.bgn{background:var(--gnb);color:var(--gn);border:1px solid #a8d8b8;}
+.twrap{background:var(--wh);border:1px solid var(--bd2);border-radius:var(--r);overflow:hidden;box-shadow:0 1px 4px rgba(26,58,140,0.05);}
+table{width:100%;border-collapse:collapse;}
+th{background:var(--bl);font-size:10px;color:var(--pr);font-weight:600;padding:9px 12px;text-align:left;border-bottom:1px solid var(--bm);}
+td{font-size:11px;padding:9px 12px;border-bottom:1px solid var(--bd2);color:var(--tx);vertical-align:middle;}
+tr:last-child td{border-bottom:none;}tr:hover td{background:var(--bp);}tr.suspended td{opacity:.55;}
+.card{background:var(--wh);border:1px solid var(--bd2);border-radius:var(--r);padding:16px;box-shadow:0 1px 4px rgba(26,58,140,0.05);margin-bottom:12px;}
+.ctit{font-size:12px;font-weight:700;color:var(--pr);margin-bottom:12px;display:flex;align-items:center;justify-content:space-between;}
+.g2{display:grid;grid-template-columns:3fr 2fr;gap:12px;margin-bottom:12px;}
+.g22{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+.g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;}
+.g4{display:grid;grid-template-columns:repeat(4,1fr);gap:9px;margin-bottom:14px;}
+.sc3{background:var(--wh);border:1px solid var(--bd2);border-radius:var(--r);padding:12px;box-shadow:0 1px 4px rgba(26,58,140,0.05);}
+.sc3.hl{border-left:3px solid var(--rd);background:var(--rdb);}.sc3.hl .sv{color:var(--rd);}
+.sl{font-size:10px;color:var(--tx2);margin-bottom:4px;display:flex;justify-content:space-between;align-items:center;}
+.sv{font-size:24px;font-weight:700;color:var(--pr);line-height:1;}
+.ss{font-size:9px;color:var(--tx3);margin-top:2px;}
+.inp{background:var(--wh);border:1px solid var(--bd);color:var(--tx);padding:6px 10px;border-radius:6px;font-size:12px;font-family:inherit;}
+.frow{display:flex;flex-direction:column;gap:3px;margin-bottom:12px;}
+.frow label{font-size:10px;font-weight:700;color:var(--tx2);}
+.frow input,.frow select,.frow textarea{background:var(--bg);border:1px solid var(--bd);color:var(--tx);padding:7px 10px;border-radius:6px;font-size:12px;font-family:inherit;width:100%;}
+.frow input:focus,.frow select:focus{outline:2px solid var(--pr3);outline-offset:-1px;background:var(--wh);}
+.frow input.err{border-color:var(--rd);background:var(--rdb);}
+.ferr{font-size:10px;color:var(--rd);margin-top:2px;display:none;}.ferr.show{display:block;}
+.bars{display:flex;align-items:flex-end;gap:5px;height:90px;}
+.bw{flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;}
+.bb{width:100%;border-radius:3px 3px 0 0;}
+.bl2{font-size:9px;color:var(--tx3);}.bv{font-size:9px;color:var(--tx2);}
+.ar{display:flex;gap:8px;padding:7px 0;border-bottom:1px solid var(--bd2);}
+.ar:last-child{border-bottom:none;}
+.ad{width:7px;height:7px;border-radius:50%;margin-top:3px;flex-shrink:0;}
+.at{font-size:11px;line-height:1.5;}.atm{font-size:9px;color:var(--tx3);}
+.drow{display:flex;align-items:center;gap:8px;margin-bottom:9px;}
+.dav2{width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;flex-shrink:0;color:#fff;}
+.dbw{background:var(--bl);border-radius:7px;height:4px;margin-top:2px;}
+.db{height:4px;border-radius:7px;}
+.idb{display:inline-flex;align-items:center;gap:5px;background:var(--bl);border:1px solid var(--bm);border-radius:4px;padding:3px 9px;font-size:12px;font-weight:700;color:var(--pr);font-family:monospace,sans-serif;}
+.pws{height:3px;border-radius:2px;background:var(--bd);margin-top:4px;overflow:hidden;}
+.pwb{height:3px;border-radius:2px;transition:width .3s,background .3s;}
+.pwm{letter-spacing:.18em;color:var(--tx3);}
+.sbar{display:flex;gap:7px;margin-bottom:13px;flex-wrap:wrap;}
+.sbar input,.sbar select{background:var(--wh);border:1px solid var(--bd);color:var(--tx);padding:6px 10px;border-radius:6px;font-size:11px;font-family:inherit;}
+.sbar input{flex:1;min-width:130px;}
+.tabs{display:flex;border-bottom:2px solid var(--bd2);margin-bottom:14px;}
+.tab{padding:8px 14px;cursor:pointer;font-size:12px;font-weight:500;color:var(--tx2);border-bottom:2px solid transparent;margin-bottom:-2px;transition:.15s;}
+.tab:hover{color:var(--pr);}.tab.on{color:var(--pr);border-bottom-color:var(--pr);font-weight:700;}
+.tog{position:relative;width:32px;height:18px;flex-shrink:0;}
+.tog input{opacity:0;width:0;height:0;}
+.togs{position:absolute;inset:0;background:var(--bd);border-radius:20px;cursor:pointer;transition:.2s;}
+.togs::before{content:'';position:absolute;width:14px;height:14px;left:2px;top:2px;background:#fff;border-radius:50%;transition:.2s;}
+.tog input:checked+.togs{background:var(--pr);}
+.tog input:checked+.togs::before{transform:translateX(14px);}
+.togrow{display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--bd2);}
+.togrow:last-child{border-bottom:none;}
+.overlay{position:fixed;inset:0;background:rgba(10,20,50,.45);display:flex;align-items:center;justify-content:center;z-index:200;padding:16px;}
+.overlay.hidden{display:none!important;}
+.modal{background:var(--wh);border-radius:var(--r);width:100%;max-width:490px;box-shadow:0 8px 32px rgba(10,20,50,.2);overflow:hidden;max-height:92vh;display:flex;flex-direction:column;}
+.mhead{background:var(--pr);padding:14px 18px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;}
+.mttl{font-size:13px;font-weight:700;color:#fff;}
+.mclose{background:none;border:none;color:rgba(255,255,255,.7);font-size:20px;cursor:pointer;line-height:1;padding:0;}
+.mbody{padding:18px;overflow-y:auto;flex:1;}
+.mfoot{padding:12px 18px;border-top:1px solid var(--bd2);display:flex;justify-content:flex-end;gap:7px;background:var(--bg);flex-shrink:0;}
+
+/* ── REPORT MATRIX ── */
+.rep-table{width:100%;border-collapse:collapse;font-size:11px;min-width:600px;}
+.rep-table th{background:var(--pr);color:#fff;padding:8px 10px;text-align:center;border:1px solid var(--pr2);white-space:nowrap;font-size:10px;position:sticky;top:0;}
+.rep-table th.name-col{text-align:left;min-width:100px;}
+.rep-table td{padding:7px 10px;border:1px solid var(--bd2);text-align:center;white-space:nowrap;}
+.rep-table tr:hover td{background:var(--bp);}
+.rep-table td.name-cell{text-align:left;font-weight:500;position:sticky;left:0;background:var(--wh);}
+.rep-table tr:hover td.name-cell{background:var(--bp);}
+.status-done{color:var(--gn);font-weight:600;}
+.status-prog{color:var(--am);font-weight:500;}
+.status-none{color:var(--rd);font-weight:600;background:var(--rdb)!important;}
+.status-na{color:var(--tx3);}
+
+#toast{position:fixed;bottom:20px;right:20px;background:var(--pr);color:#fff;padding:9px 16px;border-radius:8px;font-size:12px;font-weight:500;display:none;z-index:400;transition:opacity .3s;}
+
+/* ════════════════════════════════
+   ① LOGIN SCREEN
+════════════════════════════════ */
+#login-screen{
+  min-height:100vh;display:flex;align-items:center;justify-content:center;
+  background:linear-gradient(135deg,var(--pr) 0%,var(--pr3) 100%);
+  padding:20px;
+}
+.login-box{
+  background:var(--wh);border-radius:14px;padding:40px 36px;
+  width:100%;max-width:380px;
+  box-shadow:0 8px 40px rgba(0,0,0,0.2);
+}
+.login-logo{display:flex;align-items:center;gap:10px;margin-bottom:28px;justify-content:center;}
+.login-logo-ic{width:40px;height:40px;background:var(--pr);border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:22px;}
+.login-logo-tx{font-size:22px;font-weight:700;color:var(--pr);}
+.login-logo-sb{font-size:10px;color:var(--tx3);margin-top:1px;}
+.login-title{font-size:15px;font-weight:700;color:var(--tx);margin-bottom:22px;text-align:center;}
+.login-field{margin-bottom:16px;}
+.login-field label{display:block;font-size:11px;font-weight:700;color:var(--tx2);margin-bottom:5px;}
+.login-field input{width:100%;background:var(--bg);border:1.5px solid var(--bd);color:var(--tx);padding:11px 13px;border-radius:7px;font-size:14px;font-family:inherit;transition:.15s;letter-spacing:.06em;}
+.login-field input:focus{outline:none;border-color:var(--pr3);background:var(--wh);}
+.login-field input.err{border-color:var(--rd);background:var(--rdb);}
+.login-err{font-size:11px;color:var(--rd);margin-top:10px;text-align:center;min-height:18px;}
+.login-btn{width:100%;padding:13px;border-radius:8px;border:none;background:var(--pr);color:#fff;font-size:14px;font-weight:700;font-family:inherit;cursor:pointer;margin-top:8px;transition:.15s;}
+.login-btn:hover{background:var(--pr2);}
+.login-btn:disabled{opacity:.6;cursor:not-allowed;}
+.login-note{font-size:10px;color:var(--tx3);text-align:center;margin-top:16px;line-height:1.6;}
+/* デモ用ショートカット */
+
+
+/* ════════════════════════════════
+   ② ADMIN LAYOUT
+════════════════════════════════ */
+#admin-screen{display:none;min-height:100vh;}
+.admin-app{display:flex;min-height:100vh;}
+.sb{width:216px;background:var(--pr);display:flex;flex-direction:column;flex-shrink:0;}
+.sb-logo{padding:14px;border-bottom:1px solid rgba(255,255,255,0.12);display:flex;align-items:center;gap:9px;}
+.sb-ic{width:34px;height:34px;background:var(--ac);border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;}
+.sb-tx{font-size:15px;font-weight:700;color:#fff;}
+.sb-sb{font-size:9px;color:rgba(255,255,255,0.5);}
+.nav{flex:1;padding:8px 0;overflow-y:auto;}
+.ns{padding:7px 14px 2px;font-size:9px;color:rgba(255,255,255,0.35);text-transform:uppercase;letter-spacing:.05em;}
+.ni{display:flex;align-items:center;gap:8px;padding:7px 14px;cursor:pointer;color:rgba(255,255,255,0.62);font-size:12px;border-left:3px solid transparent;transition:.15s;user-select:none;}
+.ni:hover{background:rgba(255,255,255,0.07);color:#fff;}
+.ni.on{background:rgba(255,255,255,0.12);border-left-color:var(--ac);color:#fff;font-weight:500;}
+.ni-ic{font-size:14px;width:17px;text-align:center;flex-shrink:0;}
+.nbg{margin-left:auto;background:#e74c3c;color:#fff;font-size:9px;padding:1px 5px;border-radius:7px;font-weight:700;}
+.sb-us{padding:11px 14px;border-top:1px solid rgba(255,255,255,0.1);display:flex;align-items:center;gap:8px;}
+.uav{width:28px;height:28px;border-radius:50%;background:var(--ac);color:var(--pr);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;flex-shrink:0;}
+.unm{font-size:11px;font-weight:600;color:#fff;}.url2{font-size:9px;color:rgba(255,255,255,0.5);}
+.logout-btn{margin-left:auto;background:none;border:none;color:rgba(255,255,255,0.5);font-size:18px;cursor:pointer;padding:2px;}
+.logout-btn:hover{color:#fff;}
+.amn{flex:1;display:flex;flex-direction:column;min-width:0;}
+.topbar{background:var(--wh);border-bottom:1px solid var(--bd);height:50px;padding:0 18px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;box-shadow:0 1px 4px rgba(26,58,140,0.06);}
+.pg-ttl{font-size:14px;font-weight:700;color:var(--pr);border-left:3px solid var(--pr3);padding-left:9px;}
+.tbr{display:flex;gap:7px;}
+.ct{padding:18px;flex:1;overflow:auto;}
+.sc{display:none;}.sc.on{display:block;}
+.steps{display:flex;align-items:center;margin-bottom:18px;}
+.step{display:flex;align-items:center;gap:6px;font-size:11px;color:var(--tx3);white-space:nowrap;}
+.step.on{color:var(--pr);font-weight:700;}.step.dn{color:var(--gn);}
+.stc{width:22px;height:22px;border-radius:50%;border:2px solid var(--bd);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;flex-shrink:0;}
+.step.on .stc{border-color:var(--pr);background:var(--pr);color:#fff;}
+.step.dn .stc{border-color:var(--gn);background:var(--gn);color:#fff;}
+.stl{flex:1;height:2px;background:var(--bd2);margin:0 4px;}
+.upz{border:2px dashed var(--bm);background:var(--bp);border-radius:var(--r);padding:20px;text-align:center;cursor:pointer;transition:.2s;position:relative;margin-bottom:10px;}
+.upz:hover{border-color:var(--pr3);background:var(--bl);}
+.upz input[type=file]{position:absolute;inset:0;opacity:0;cursor:pointer;}
+.fi{display:flex;align-items:center;gap:9px;padding:8px 11px;background:var(--wh);border:1px solid var(--bd2);border-radius:7px;margin-top:7px;}
+.fp{height:3px;background:var(--bl);border-radius:2px;margin-top:3px;}.fb{height:3px;border-radius:2px;background:var(--pr3);}
+.qi{background:var(--wh);border:1px solid var(--bd2);border-radius:var(--r);overflow:hidden;margin-bottom:9px;}
+.qih{display:flex;align-items:center;gap:8px;padding:9px 12px;background:var(--bp);border-bottom:1px solid var(--bd2);cursor:pointer;}
+.qn{width:20px;height:20px;border-radius:50%;background:var(--pr);color:#fff;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;flex-shrink:0;}
+.qb{padding:12px;}
+.qol{display:flex;flex-direction:column;gap:5px;margin-top:6px;}
+.qor{display:flex;align-items:center;gap:6px;}
+.qor input[type=text]{flex:1;background:var(--bg);border:1px solid var(--bd);color:var(--tx);padding:5px 8px;border-radius:4px;font-size:11px;font-family:inherit;}
+.qaob{font-size:11px;color:var(--pr3);background:none;border:1px dashed var(--bm);border-radius:4px;padding:4px 9px;cursor:pointer;font-family:inherit;width:100%;margin-top:3px;}
+.csgrid{display:grid;grid-template-columns:1fr 1fr;gap:9px;}
+.cslot{border:2px dashed var(--bd);border-radius:7px;padding:11px;min-height:70px;cursor:pointer;transition:.15s;position:relative;}
+.cslot:hover{border-color:var(--pr3);background:var(--bp);}
+.cslot.filled{border:1px solid var(--bd2);background:var(--wh);cursor:default;}
+.tagwrap{display:flex;flex-wrap:wrap;gap:4px;padding:5px 7px;background:var(--bg);border:1px solid var(--bd);border-radius:5px;min-height:32px;cursor:text;}
+.tagpill{display:inline-flex;align-items:center;gap:3px;background:var(--bl);color:var(--pr);font-size:10px;padding:2px 7px;border-radius:10px;}
+.tagpill button{background:none;border:none;cursor:pointer;color:var(--pr3);font-size:11px;line-height:1;}
+.taginp{border:none;background:none;color:var(--tx);font-size:11px;font-family:inherit;outline:none;min-width:60px;}
+
+/* ════════════════════════════════
+   ③ DRIVER SCREEN
+   スマホ基準 ＋ PC でも同じ縦レイアウト
+════════════════════════════════ */
+#driver-screen{display:none;min-height:100vh;background:#f0f4f8;}
+.d-wrap{
+  /* PCでも最大幅430pxに制限してスマホUIを維持 */
+  max-width:430px;
+  margin:0 auto;
+  min-height:100vh;
+  background:var(--wh);
+  display:flex;
+  flex-direction:column;
+  box-shadow:0 0 30px rgba(26,58,140,0.12);
+}
+/* PC幅のときは画面中央に配置 */
+@media(min-width:430px){
+  #driver-screen{
+    display:flex;
+    align-items:flex-start;
+    justify-content:center;
+    padding:0;
+  }
+  .d-wrap{min-height:100vh;}
+}
+
+/* ── ドライバー ヘッダー ── */
+.d-header{
+  background:var(--pr);
+  padding:0 14px;
+  height:50px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  flex-shrink:0;
+  position:sticky;top:0;z-index:10;
+}
+.d-logo{font-size:18px;font-weight:700;color:#fff;letter-spacing:-.3px;}
+.d-badge{background:var(--ac);color:var(--pr);font-size:9px;font-weight:700;padding:2px 7px;border-radius:3px;margin-left:5px;}
+.d-user{display:flex;align-items:center;gap:6px;color:#fff;font-size:11px;cursor:pointer;}
+.d-av{width:26px;height:26px;border-radius:50%;background:var(--ac);color:var(--pr);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;}
+.d-logout{background:none;border:none;color:rgba(255,255,255,0.65);font-size:18px;cursor:pointer;margin-left:4px;}
+.d-logout:hover{color:#fff;}
+
+/* ── ドライバー コンテンツ ── */
+.d-body{flex:1;overflow-y:auto;background:#f0f4f8;padding-bottom:64px;}
+.d-sc{display:none;}.d-sc.on{display:block;}
+
+/* セクションヘッダー */
+.d-sec{background:var(--pr);color:#fff;font-size:13px;font-weight:700;padding:10px 14px;}
+.d-sub{background:var(--bl);color:var(--pr);font-size:11px;padding:7px 14px;border-bottom:1px solid var(--bm);}
+
+/* 今月サムネイル横スクロール */
+.d-thumbs{
+  display:flex;gap:0;overflow-x:auto;
+  background:var(--wh);border-bottom:1px solid var(--bd2);
+  scrollbar-width:none;
+}
+.d-thumbs::-webkit-scrollbar{display:none;}
+.d-thumb{
+  flex-shrink:0;
+  /* PC/スマホ共通: 幅は親の1/3 */
+  width:calc(100% / 3);
+  aspect-ratio:16/9;
+  overflow:hidden;cursor:pointer;position:relative;
+  border-right:2px solid var(--wh);
+}
+.d-thumb:last-child{border-right:none;}
+.d-thumb-img{width:100%;height:100%;display:flex;align-items:flex-end;padding:5px 6px;}
+.d-thumb-lbl{color:#fff;font-size:9px;font-weight:700;line-height:1.3;text-shadow:0 1px 3px rgba(0,0,0,.7);}
+.d-thumb-ic{position:absolute;top:4px;left:4px;width:20px;height:20px;background:rgba(26,58,140,0.8);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;}
+
+/* リストアイテム */
+.d-item{
+  display:flex;gap:0;
+  background:var(--wh);border-bottom:1px solid var(--bd2);
+  cursor:pointer;transition:background .15s;
+}
+.d-item:hover{background:var(--bp);}
+.d-item-thumb{
+  width:120px;min-width:120px;
+  aspect-ratio:16/9;
+  overflow:hidden;flex-shrink:0;
+}
+.d-item-thumb-img{width:100%;height:100%;display:flex;align-items:flex-end;padding:4px 6px;}
+.d-item-info{flex:1;padding:10px 12px;min-width:0;display:flex;flex-direction:column;justify-content:center;}
+.d-item-title{font-size:13px;font-weight:600;color:var(--tx);margin-bottom:3px;line-height:1.35;}
+.d-item-date{font-size:10px;color:var(--tx3);margin-bottom:4px;}
+.d-item-ic{position:absolute;top:4px;left:4px;width:20px;height:20px;background:rgba(26,58,140,0.8);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;}
+
+/* ステータス表示 */
+.st-pf{display:inline-flex;align-items:center;gap:4px;font-size:11px;font-weight:700;color:var(--rd);}
+.st-dn{display:inline-flex;align-items:center;gap:3px;font-size:11px;font-weight:500;color:var(--gn);}
+.st-pr{display:inline-flex;align-items:center;gap:3px;font-size:11px;font-weight:500;color:var(--am);}
+.st-nn{display:inline-flex;align-items:center;gap:3px;font-size:11px;color:var(--tx3);}
+
+/* ── ドライバー ボトムナビ ── */
+.d-nav{
+  display:flex;background:var(--wh);border-top:1px solid var(--bd2);
+  flex-shrink:0;position:sticky;bottom:0;z-index:10;
+}
+.d-ni{flex:1;display:flex;flex-direction:column;align-items:center;padding:7px 3px;cursor:pointer;font-size:9px;color:var(--tx3);gap:2px;border-top:2px solid transparent;transition:.15s;user-select:none;}
+.d-ni.on{color:var(--pr);border-top-color:var(--pr);}
+.d-ni-ic{font-size:17px;}
+
+/* 受講履歴ステータスカード */
+.d-stat{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px;padding:12px;}
+.d-sc3{background:var(--wh);border:1px solid var(--bd2);border-radius:8px;padding:10px;text-align:center;}
+.d-sv{font-size:20px;font-weight:700;color:var(--pr);}
+.d-sl{font-size:9px;color:var(--tx2);margin-top:1px;}
+.d-pad{padding:12px;}
+.d-mc{background:var(--wh);border:1px solid var(--bd2);border-radius:7px;padding:11px;margin-bottom:8px;}
+
+/* クイズ */
+.qwrap{max-width:560px;}
+.qctr{font-size:10px;color:var(--tx2);margin-bottom:4px;}
+.qpbar{background:var(--bl);border-radius:7px;height:4px;margin-bottom:12px;}
+.qpfill{height:4px;border-radius:7px;background:var(--pr3);transition:.3s;}
+.qtxt{font-size:13px;font-weight:500;line-height:1.6;margin-bottom:14px;}
+.qopts{display:flex;flex-direction:column;gap:6px;margin-bottom:12px;}
+.qopt{padding:9px 13px;border-radius:6px;border:1.5px solid var(--bd);background:var(--wh);cursor:pointer;font-size:12px;display:flex;align-items:center;gap:8px;transition:.15s;}
+.qopt:hover{border-color:var(--pr3);background:var(--bp);}
+.qopt.ok{border-color:var(--gn);background:var(--gnb);}
+.qopt.ng{border-color:var(--rd);background:var(--rdb);}
+.ocr{width:18px;height:18px;border-radius:50%;border:1.5px solid var(--bd2);display:flex;align-items:center;justify-content:center;font-size:9px;flex-shrink:0;}
+.qfb{padding:9px 11px;border-radius:6px;font-size:11px;line-height:1.6;margin-bottom:10px;}
+.qfb.ok{background:var(--gnb);border:1px solid #a8d8b8;color:var(--gn);}
+.qfb.ng{background:var(--rdb);border:1px solid #f0bab5;color:var(--rd);}
+.qresult{text-align:center;padding:24px 0;}
+</style>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+</head>
+<body>
+
+<!-- ════════════════════════════════
+     ① ログイン画面
+════════════════════════════════ -->
+<div id="login-screen" style="display:none">
+  <div class="login-box">
+    <div class="login-logo">
+      <img src="data:image/png;base64,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" alt="トラレポ" style="width:56px;height:56px;border-radius:12px;object-fit:cover"/>
+      <div>
+        <div class="login-logo-tx">トラレポ</div>
+        <div class="login-logo-sb">ドライバー教育クラウド</div>
+      </div>
+    </div>
+    <div class="login-title">ログイン</div>
+    <div class="login-field">
+      <label>ログインID</label>
+      <input type="text" id="lid" placeholder="例: 1234 または abcd" autocomplete="username" oninput="clearErr()"/>
+    </div>
+    <div class="login-field">
+      <label>パスワード</label>
+      <input type="password" id="lpw" placeholder="パスワードを入力" autocomplete="current-password" oninput="clearErr()" onkeydown="if(event.key==='Enter')doLogin()"/>
+    </div>
+    <div class="login-err" id="login-err"></div>
+    <button class="login-btn" id="login-btn" onclick="doLogin()">ログイン</button>
+
+  </div>
+</div>
+
+<!-- ════════════════════════════════
+     ② 管理者画面
+════════════════════════════════ -->
+<div id="admin-screen" style="display:none">
+<div class="admin-app">
+<div class="sb">
+  <div class="sb-logo"><img src="data:image/png;base64,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" alt="トラレポ" style="width:34px;height:34px;border-radius:7px;object-fit:cover;flex-shrink:0"/><div><div class="sb-tx">トラレポ</div><div class="sb-sb">管理者コンソール</div></div></div>
+  <div class="nav">
+    <div class="ns">メイン</div>
+    <div class="ni on" onclick="ago('dash')"><span class="ni-ic">📊</span>ダッシュボード</div>
+    <div class="ns">コンテンツ管理</div>
+    <div class="ni" onclick="ago('list')"><span class="ni-ic">📋</span>教材一覧</div>
+    <div class="ns">管理</div>
+    <div class="ni" onclick="ago('users')"><span class="ni-ic">👥</span>ユーザー管理<span class="nbg" id="sus-badge">2</span></div>
+    <div class="ni" onclick="ago('report')"><span class="ni-ic">📈</span>レポート・帳票</div>
+    <div class="ni" onclick="openRecordSheet()" style="padding-left:26px"><span class="ni-ic">📋</span>教育記録簿出力</div>
+  </div>
+  
+<div class="sb-us">
+    <div class="uav" id="a-av">管</div>
+    <div><div class="unm" id="a-nm">田中 管理者</div><div class="url2" id="a-rl">本社安全担当者</div></div>
+    <button class="logout-btn" onclick="doLogout()" title="ログアウト">⏏</button>
+  </div>
+</div>
+<div class="amn">
+  <div class="topbar">
+    <div class="pg-ttl" id="pg-ttl">ダッシュボード</div>
+    <div class="tbr" id="tbr">
+      <button class="btn bg2" onclick="ago('report')">📤 レポート出力</button>
+      <button class="btn bp" onclick="ago('create')">➕ コンテンツ追加</button>
+    </div>
+  </div>
+  <div class="ct">
+
+  <!-- DASHBOARD -->
+  <div class="sc on" id="s-dash">
+    <div class="g4">
+      <div class="sc3"><div class="sl">登録ドライバー</div><div class="sv" id="dash-total">—</div><div class="ss">アクティブユーザー</div></div>
+      <div class="sc3"><div class="sl">受講完了率</div><div class="sv" id="dash-rate">—</div><div class="ss">合格済みドライバー</div></div>
+      <div class="sc3"><div class="sl">平均テスト正答率</div><div class="sv" id="dash-avg">—</div><div class="ss">全テスト平均</div></div>
+      <div class="sc3 hl"><div class="sl">未受講ドライバー <span style="color:var(--rd);font-size:9px">要対応</span></div><div class="sv" id="dash-unrec">—</div><div class="ss">一度も受講なし</div></div>
+    </div>
+    <div class="g2">
+      <div class="card">
+        <div class="ctit">ドライバー別進捗 <span style="font-size:10px;color:var(--pr3);cursor:pointer;font-weight:400" onclick="ago('users')">全員を見る →</span></div>
+        <div id="dp-list"></div>
+      </div>
+      <div class="card">
+        <div class="ctit">アラート・通知</div>
+        <div class="ar"><div class="ad" style="background:#e74c3c"></div><div><div class="at">山田 太郎さんが7日間未ログインです</div><div class="atm">今日</div></div></div>
+        <div class="ar"><div class="ad" style="background:var(--am)"></div><div><div class="at">「危険予知訓練」テスト合格率65%に低下</div><div class="atm">昨日</div></div></div>
+        <div class="ar"><div class="ad" style="background:var(--am)"></div><div><div class="at">高速道路安全運転の受講期限まで8日</div><div class="atm">2日前</div></div></div>
+        <div class="ar"><div class="ad" style="background:var(--gn)"></div><div><div class="at">新コース「積載物管理」が追加されました</div><div class="atm">3日前</div></div></div>
+      </div>
+    </div>
+    <div class="card"><div class="ctit">月別受講完了率（2025年度）</div><div class="bars" id="m-bars"></div></div>
+  </div>
+
+  <!-- 教材一覧 -->
+  <div class="sc" id="s-list">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+      <div style="display:flex;gap:7px;flex-wrap:wrap">
+        <input class="inp" placeholder="教材名で検索..." style="width:160px"/>
+        <select class="inp"><option>全カテゴリ</option><option>安全運転</option><option>法規</option><option>KYT</option></select>
+        <select class="inp"><option>全ステータス</option><option>公開中</option><option>下書き</option></select>
+      </div>
+
+    </div>
+    <div class="twrap"><table><thead><tr><th>教材名</th><th>カテゴリ</th><th>動画</th><th>ステータス</th><th>操作</th></tr></thead><tbody id="list-tb"></tbody></table></div>
+  </div>
+
+  <!-- 新規コンテンツ作成 -->
+  <div class="sc" id="s-create">
+    <div class="steps" id="steps-bar"></div>
+    <div id="sp1" style="display:none"><div class="card"><div class="ctit">📝 基本情報</div>
+      <div class="frow"><label>教材タイトル *</label><input type="text" id="ttl-inp" placeholder="例：高速道路での安全な車間距離" oninput="upThumb()"/></div>
+      <div class="g22" style="margin-bottom:0">
+        <div class="frow"><label>カテゴリ</label><select><option>安全運転</option><option>法規・法定12項目</option><option>エコドライブ</option><option>緊急対応</option><option>KYT</option></select></div>
+        <div class="frow"><label>種別</label><select><option>ワンポイント動画</option><option>法定12項目</option><option>KYT</option></select></div>
+      </div>
+      <div class="frow"><label>説明文</label><textarea style="min-height:60px;resize:vertical;background:var(--bg);border:1px solid var(--bd);color:var(--tx);padding:7px 10px;border-radius:6px;font-size:12px;font-family:inherit;width:100%" placeholder="この教材の概要..."></textarea></div>
+      <div class="frow"><label>ハッシュタグ（Enterで追加）</label>
+        <div class="tagwrap" onclick="document.getElementById('tginp').focus()">
+          <span class="tagpill">#安全運転<button onclick="this.parentElement.remove()">×</button></span>
+          <input class="taginp" id="tginp" placeholder="タグを追加..." onkeydown="addTag(event)"/>
+        </div>
+      </div>
+      <div class="g22">
+        <div class="frow"><label>サムネイル背景色</label><input type="color" id="thclr" value="#1a3a8c" oninput="upThumb()" style="height:34px;padding:2px;cursor:pointer;width:100%;border-radius:5px;border:1px solid var(--bd)"/></div>
+        <div class="frow"><label>プレビュー</label><div id="th-prev" style="background:#1a3a8c;border-radius:7px;height:68px;display:flex;align-items:flex-end;padding:7px"><span id="th-lbl" style="color:#fff;font-size:11px;font-weight:700;text-shadow:0 1px 4px rgba(0,0,0,.6)">タイトル未入力</span></div></div>
+      </div>
+    </div>
+    <div style="display:flex;justify-content:flex-end"><button class="btn bp" onclick="gst(2)">次へ → ファイルアップロード</button></div></div>
+
+    <div id="sp2" style="display:none">
+      <div class="card"><div class="ctit">🎬 動画ファイル</div>
+        <div class="upz"><input type="file" accept="video/*" onchange="hfile(event,'vid')"/>
+          <div style="font-size:26px;margin-bottom:5px">🎬</div>
+          <div style="font-size:12px;font-weight:600;color:var(--pr);margin-bottom:2px">動画をドラッグ&amp;ドロップ</div>
+          <div style="font-size:10px;color:var(--tx2)">MP4・MOV・AVI（最大2GB）</div>
+        </div>
+        <div id="vid-list"><div class="fi"><span style="font-size:17px">🎬</span><div style="flex:1;min-width:0"><div style="font-size:11px;font-weight:500">動画_高速道路安全運転.mp4</div><div style="font-size:9px;color:var(--tx3)">245.8 MB</div><div class="fp"><div class="fb" style="width:100%"></div></div></div><span style="font-size:10px;font-weight:600;color:var(--gn)">✓ 完了</span></div></div>
+      </div>
+      <div class="card"><div class="ctit">📄 資料ファイル <span style="font-size:10px;color:var(--tx3);font-weight:400">（複数可）</span></div>
+        <div class="upz"><input type="file" accept=".pdf,.pptx,.docx,.xlsx" multiple onchange="hfile(event,'doc')"/>
+          <div style="font-size:26px;margin-bottom:5px">📄</div>
+          <div style="font-size:12px;font-weight:600;color:var(--pr);margin-bottom:2px">資料をドラッグ&amp;ドロップ</div>
+          <div style="font-size:10px;color:var(--tx2)">PDF・PowerPoint・Word・Excel</div>
+        </div>
+        <div id="doc-list">
+          <div class="fi"><span style="font-size:17px">📄</span><div style="flex:1;min-width:0"><div style="font-size:11px;font-weight:500">資料_高速道路安全（日本語）.pdf</div><div style="font-size:9px;color:var(--tx3)">2.4 MB</div><div class="fp"><div class="fb" style="width:100%"></div></div></div><span style="font-size:10px;font-weight:600;color:var(--gn)">✓ 完了</span></div>
+        </div>
+      </div>
+      <div style="display:flex;justify-content:space-between"><button class="btn bg2" onclick="gst(1)">← 基本情報</button><button class="btn bp" onclick="gst(3)">次へ → テスト作成</button></div>
+    </div>
+
+    <div id="sp3" style="display:none">
+      <div class="card"><div class="ctit">✏️ テスト設定
+        <div style="display:flex;gap:5px">
+          <button class="btn bg2 bsm" onclick="addQ('choice')">＋ 選択式</button>
+          <button class="btn bg2 bsm" onclick="addQ('ox')">＋ ○×</button>
+          <button class="btn bg2 bsm" onclick="addQ('text')">＋ 記述式</button>
+          <button class="btn bp bsm" onclick="aiGen()">✨ AI生成</button>
+        </div>
+      </div>
+      <div class="g3" style="margin-bottom:12px">
+        <div class="frow"><label>合格基準点</label><input type="number" value="70"/></div>
+        <div class="frow"><label>制限時間（分）</label><input type="number" value="15"/></div>
+        <div class="frow"><label>出題タイミング</label><select><option>動画視聴後に自動出題</option><option>任意のタイミング</option></select></div>
+      </div>
+      <div id="q-list"></div>
+      <div id="q-empty" style="text-align:center;padding:22px;color:var(--tx3);font-size:11px">＋ ボタンで問題を追加するか「✨ AI生成」をお試しください</div>
+      </div>
+      <div style="display:flex;justify-content:space-between"><button class="btn bg2" onclick="gst(2)">← アップロード</button><button class="btn bp" onclick="gst(4)">次へ → 配信設定</button></div>
+    </div>
+
+    <div id="sp4" style="display:none">
+      <div class="g22">
+        <div><div class="card"><div class="ctit">👥 配信対象</div>
+          <div style="display:flex;gap:5px;margin-bottom:9px">
+            <button class="btn bg2 bsm" onclick="chkAll(true)">全選択</button>
+            <button class="btn bg2 bsm" onclick="chkAll(false)">全解除</button>
+            <select class="inp" style="font-size:10px;flex:1" onchange="fltBr(this.value)"><option value="all">全営業所</option><option>東京</option><option>大阪</option><option>名古屋</option></select>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:5px;max-height:190px;overflow-y:auto" id="drv-chk"></div>
+        </div></div>
+        <div>
+          <div class="card"><div class="ctit">📅 公開期間</div>
+            <div class="frow"><label>開始日</label><input type="date" value="2026-05-01"/></div>
+            <div class="frow"><label>期限</label><input type="date" value="2026-05-31"/></div>
+            <div class="frow"><label>区分</label><select><option>必修</option><option>推奨</option><option>任意</option></select></div>
+          </div>
+          <div class="card"><div class="ctit">🔔 通知設定</div>
+            <div class="togrow"><div><div style="font-size:11px">公開時プッシュ通知</div></div><label class="tog"><input type="checkbox" checked/><span class="togs"></span></label></div>
+            <div class="togrow"><div><div style="font-size:11px">期限3日前リマインダー</div></div><label class="tog"><input type="checkbox" checked/><span class="togs"></span></label></div>
+          </div>
+        </div>
+      </div>
+      <div style="display:flex;justify-content:space-between">
+        <button class="btn bg2" onclick="gst(3)">← テスト設定</button>
+        <div style="display:flex;gap:7px">
+          <button class="btn bg2" onclick="toast2('下書きを保存しました')">💾 下書き保存</button>
+          <button class="btn bp" onclick="toast2('✅ 公開しました！配信対象者に通知されます。','var(--gn)')">🚀 公開する</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- テスト管理 -->
+  <div class="sc" id="s-qmgr">
+    <div style="display:flex;justify-content:flex-end;margin-bottom:11px"><button class="btn bp" onclick="ago('create');gst(3)">➕ テスト新規作成</button></div>
+    <div class="twrap"><table><thead><tr><th>教材名</th><th>問題数</th><th>形式</th><th>合格基準</th><th>平均正答率</th><th>受験者</th><th>操作</th></tr></thead><tbody id="qmgr-tb"></tbody></table></div>
+  </div>
+
+  <!-- コース設定 -->
+  <div class="sc" id="s-course">
+    <div class="g22" style="align-items:start">
+      <div>
+        <div class="card"><div class="ctit">📚 コース情報</div>
+          <div class="frow"><label>コース名 *</label><input value="2026年度 安全運転基礎コース"/></div>
+          <div class="g22"><div class="frow"><label>対象</label><select><option>全ドライバー</option><option>新人のみ</option></select></div><div class="frow"><label>修了証明書</label><select><option>発行する</option><option>発行しない</option></select></div></div>
+        </div>
+        <div class="card"><div class="ctit">コース構成</div><div class="csgrid" id="cs-grid"></div><button class="qaob" style="margin-top:9px" onclick="addSlot()">＋ 教材を追加</button></div>
+      </div>
+      <div class="card"><div class="ctit">教材ライブラリ</div><input class="inp" placeholder="教材を検索..." style="width:100%;margin-bottom:9px"/><div style="display:flex;flex-direction:column;gap:5px;max-height:420px;overflow-y:auto" id="lib-pick"></div></div>
+    </div>
+  </div>
+
+  <!-- 配信・期限設定 -->
+  <div class="sc" id="s-dlv">
+    <div class="tabs"><div class="tab on" onclick="dtab(this,'da')">配信中</div><div class="tab" onclick="dtab(this,'ds')">配信予定</div><div class="tab" onclick="dtab(this,'de')">終了済み</div></div>
+    <div id="da"><div class="twrap"><table><thead><tr><th>教材名</th><th>配信対象</th><th>必修</th><th>開始日</th><th>期限</th><th>完了率</th><th>操作</th></tr></thead><tbody id="dlv-tb"></tbody></table></div></div>
+    <div id="ds" style="display:none"><div style="text-align:center;padding:36px;color:var(--tx3)">配信予定の教材はありません</div></div>
+    <div id="de" style="display:none"><div style="text-align:center;padding:36px;color:var(--tx3)">終了済みの配信はありません</div></div>
+  </div>
+
+  <!-- ユーザー管理 -->
+  <div class="sc" id="s-users">
+    <div class="g4" style="margin-bottom:14px">
+      <div class="sc3"><div class="sl">登録総数</div><div class="sv" id="st-tot">0</div></div>
+      <div class="sc3"><div class="sl">アクティブ</div><div class="sv" id="st-act" style="color:var(--gn)">0</div></div>
+      <div class="sc3"><div class="sl">休止中</div><div class="sv" id="st-sus" style="color:var(--gy)">0</div></div>
+      <div class="sc3"><div class="sl">今月新規</div><div class="sv" id="st-new" style="color:var(--pr3)">0</div></div>
+    </div>
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:11px">
+      <div class="tabs" style="margin-bottom:0;border:none">
+        <div class="tab on" id="tab-all" onclick="swTab('all')">全員 <span id="cnt-all" style="background:var(--bl);color:var(--pr);padding:1px 5px;border-radius:6px;font-size:9px;font-weight:700">0</span></div>
+        <div class="tab" id="tab-act" onclick="swTab('act')">アクティブ <span id="cnt-act" style="background:var(--gnb);color:var(--gn);padding:1px 5px;border-radius:6px;font-size:9px;font-weight:700">0</span></div>
+        <div class="tab" id="tab-sus" onclick="swTab('sus')">休止中 <span id="cnt-sus" style="background:var(--gyb);color:var(--gy);padding:1px 5px;border-radius:6px;font-size:9px;font-weight:700">0</span></div>
+      </div>
+      <div style="display:flex;gap:7px">
+        <button class="btn bg2" onclick="openModal('modal-imp')">📥 CSV一括登録</button>
+        <button class="btn bp" onclick="openReg()">➕ 新規登録</button>
+      </div>
+    </div>
+    <div class="sbar">
+      <input type="text" id="usr-q" placeholder="名前・ログインID・社員番号で検索..." oninput="renderUsers()"/>
+      <select class="inp" id="usr-br" onchange="renderUsers()"><option value="">全営業所</option><option>東京</option><option>大阪</option><option>名古屋</option><option>福岡</option></select>
+      <select class="inp" id="usr-role" onchange="renderUsers()"><option value="">全役職</option><option>ドライバー</option><option>リーダー</option><option>管理者</option></select>
+      <button class="btn bg2" onclick="document.getElementById('usr-q').value='';document.getElementById('usr-br').value='';document.getElementById('usr-role').value='';renderUsers()">リセット</button>
+    </div>
+    <div class="twrap"><table><thead><tr><th><input type="checkbox" id="chk-all" onchange="toggleAll(this.checked)" style="accent-color:var(--pr)"/></th><th>名前</th><th>ログインID</th><th>社員番号</th><th>営業所</th><th>役職</th><th>受講進捗</th><th>最終ログイン</th><th>ステータス</th><th>操作</th></tr></thead><tbody id="user-tb"></tbody></table></div>
+    <div id="bulk-bar" style="display:none;margin-top:9px;padding:9px 12px;background:var(--bl);border:1px solid var(--bm);border-radius:7px;align-items:center;gap:9px">
+      <span style="font-size:11px;color:var(--pr);font-weight:600" id="bulk-cnt">0件選択中</span>
+      <button class="btn bsm bgn" onclick="bulkAct()">✓ 一括アクティブ</button>
+      <button class="btn bsm" style="background:var(--gyb);color:var(--gy);border:1px solid #d1d5db" onclick="bulkSus()">⏸ 一括休止</button>
+      <button class="btn bsm bdng" onclick="bulkDel()">🗑 一括削除</button>
+    </div>
+  </div>
+
+  <!-- レポート -->
+  <div class="sc" id="s-report">
+    <div style="display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap;align-items:center">
+      <select class="inp" id="rep-branch" onchange="loadReport()"><option value="">全営業所</option></select>
+      <select class="inp" id="rep-status" onchange="loadReport()">
+        <option value="">全ステータス</option>
+        <option value="not_started">未受講のみ</option>
+        <option value="completed">完了のみ</option>
+      </select>
+      <button class="btn bg2" onclick="loadReport()">🔍 更新</button>
+      <button class="btn bp" style="margin-left:auto" onclick="exportReportCSV()">📥 CSV出力</button>
+      <button class="btn bg2" onclick="window.open('report_generator.html','_blank')">📋 記録簿PDF</button>
+    </div>
+    <div class="g4" style="margin-bottom:14px">
+      <div class="sc3"><div class="sl">対象ドライバー</div><div class="sv" id="rep-total">—</div></div>
+      <div class="sc3"><div class="sl">完了者数</div><div class="sv" id="rep-done" style="color:var(--gn)">—</div></div>
+      <div class="sc3"><div class="sl">受講中</div><div class="sv" id="rep-prog" style="color:var(--am)">—</div></div>
+      <div class="sc3"><div class="sl">未受講</div><div class="sv" id="rep-none" style="color:var(--rd)">—</div></div>
+    </div>
+    <div style="overflow-x:auto">
+      <div id="rep-matrix-wrap">
+        <div style="text-align:center;padding:32px;color:var(--tx3)">読み込み中...</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- システム設定 -->
+  <div class="sc" id="s-cfg">
+    <div style="max-width:480px;display:flex;flex-direction:column;gap:12px">
+      <div class="card"><div class="ctit">🏢 会社情報</div>
+        <div class="frow"><label>会社名</label><input id="cfg-company" value="〇〇運輸株式会社"/></div>
+        <div class="frow"><label>管理者メール</label><input value="admin@example-transport.co.jp"/></div>
+      </div>
+      <div class="card"><div class="ctit">🔔 通知設定</div>
+        <div class="togrow"><div style="font-size:11px">未受講アラートメール</div><label class="tog"><input type="checkbox" checked/><span class="togs"></span></label></div>
+        <div class="togrow"><div style="font-size:11px">受講期限リマインダー</div><label class="tog"><input type="checkbox" checked/><span class="togs"></span></label></div>
+        <div class="togrow"><div style="font-size:11px">テスト不合格通知</div><label class="tog"><input type="checkbox" checked/><span class="togs"></span></label></div>
+        <div class="togrow"><div style="font-size:11px">月次レポート自動送信</div><label class="tog"><input type="checkbox"/><span class="togs"></span></label></div>
+      </div>
+      <button class="btn bp" style="width:fit-content" onclick="saveCfg()">保存する</button>
+    </div>
+  </div>
+
+  </div>
+</div>
+</div>
+</div>
+
+<!-- ════════════════════════════════
+     ③ ドライバー画面（スマホUI）
+════════════════════════════════ -->
+<div id="driver-screen" style="display:none">
+  <div class="d-wrap">
+    <!-- ヘッダー -->
+    <div class="d-header">
+      <div style="display:flex;align-items:center;gap:8px">
+        <img src="data:image/png;base64,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" alt="トラレポ" style="width:30px;height:30px;border-radius:7px;object-fit:cover"/>
+        <div class="d-logo">トラレポ</div>
+        <div class="d-badge">受講者</div>
+      </div>
+      <div style="display:flex;align-items:center;gap:4px">
+        <div class="d-user">
+          <div class="d-av" id="d-av">鈴</div>
+          <span id="d-nm" style="font-size:11px">アスア 鈴木</span>
+        </div>
+        <button class="d-logout" onclick="doLogout()" title="ログアウト">⏏</button>
+      </div>
+    </div>
+
+    <!-- コンテンツ -->
+    <div class="d-body">
+
+      <!-- TOP -->
+      <div class="d-sc on" id="ds-top">
+        <div class="d-sec">今月の教材</div>
+        <div class="d-thumbs" id="d-today"></div>
+        <div class="d-sec">未受講教材</div>
+        <div class="d-sub">画像タップで受講できます。</div>
+        <div id="d-unrec"></div>
+        <div class="d-sec">完了教材</div>
+        <div class="d-sub">画像タップで受講できます。</div>
+        <div id="d-done"></div>
+      </div>
+
+      <!-- 教材一覧 -->
+      <div class="d-sc" id="ds-lib">
+        <div class="d-sec">教材一覧</div>
+        <div style="padding:9px 12px;background:var(--wh);border-bottom:1px solid var(--bd2);display:flex;gap:5px;flex-wrap:wrap" id="d-chips">
+          <button class="btn bsm bg2" style="border-radius:14px" onclick="dfc(this,'all')">すべて</button>
+          <button class="btn bsm bg2" style="border-radius:14px" onclick="dfc(this,'safety')">安全運転</button>
+          <button class="btn bsm bg2" style="border-radius:14px" onclick="dfc(this,'legal')">法規</button>
+          <button class="btn bsm bg2" style="border-radius:14px" onclick="dfc(this,'eco')">エコ</button>
+          <button class="btn bsm bg2" style="border-radius:14px" onclick="dfc(this,'kyt')">KYT</button>
+        </div>
+        <div id="d-lib"></div>
+      </div>
+
+      <!-- 確認テスト -->
+      <div class="d-sc" id="ds-quiz">
+        <div class="d-sec">確認テスト</div>
+        <div class="d-pad"><div class="qwrap" id="d-qwrap"></div></div>
+      </div>
+
+      <!-- 受講履歴 -->
+      <div class="d-sc" id="ds-hist">
+        <div class="d-sec">受講履歴</div>
+        <div class="d-pad">
+          <div class="d-stat" id="d-stat-cards">
+            <div class="d-sc3"><div class="d-sv" id="hist-done">—</div><div class="d-sl">完了教材</div></div>
+            <div class="d-sc3"><div class="d-sv" id="hist-avg">—</div><div class="d-sl">平均正答率</div></div>
+          </div>
+          <div id="d-hist"><div style="text-align:center;padding:24px;color:var(--tx3);font-size:12px">読み込み中...</div></div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ボトムナビ -->
+    <div class="d-nav">
+      <div class="d-ni on" id="dn-top" onclick="dgo('top')"><div class="d-ni-ic">🏠</div>TOP</div>
+      <div class="d-ni" id="dn-lib" onclick="dgo('lib')"><div class="d-ni-ic">🎬</div>教材</div>
+      <div class="d-ni" id="dn-quiz" onclick="dgo('quiz')"><div class="d-ni-ic">✏️</div>テスト</div>
+      <div class="d-ni" id="dn-hist" onclick="dgo('hist')"><div class="d-ni-ic">📋</div>履歴</div>
+    </div>
+  </div>
+</div>
+
+<!-- ═ MODALS ═ -->
+<div class="overlay hidden" id="modal-reg">
+  <div class="modal">
+    <div class="mhead"><div class="mttl" id="reg-ttl">👤 新規ドライバー登録</div><button class="mclose" onclick="closeModal('modal-reg')">×</button></div>
+    <div class="mbody">
+      <div class="g22">
+        <div class="frow"><label>姓 *</label><input id="r-sei" placeholder="山田"/><div class="ferr" id="e-sei">入力してください</div></div>
+        <div class="frow"><label>名 *</label><input id="r-mei" placeholder="太郎"/><div class="ferr" id="e-mei">入力してください</div></div>
+      </div>
+      <div class="g22">
+        <div class="frow"><label>社員番号</label><input id="r-eid" placeholder="T-0021"/></div>
+        <div class="frow"><label>役職</label><select id="r-role"><option>ドライバー</option><option>リーダー</option><option>管理者</option></select></div>
+      </div>
+      <div class="frow"><label>営業所 *</label><select id="r-br"><option value="">選択してください</option><option>東京</option><option>大阪</option><option>名古屋</option><option>福岡</option></select><div class="ferr" id="e-br">選択してください</div></div>
+      <div style="border-top:1px solid var(--bd2);margin:12px 0"></div>
+      <div style="font-size:11px;font-weight:700;color:var(--pr);margin-bottom:10px">🔑 ログイン情報</div>
+      <div class="frow">
+        <label>ログインID * <span style="font-weight:400;color:var(--tx3)">（4〜12文字、英数字）</span></label>
+        <div style="display:flex;gap:7px">
+          <div style="flex:1"><input id="r-id" placeholder="例: 1234 / abcd" maxlength="12" oninput="valId()"/><div class="ferr" id="e-id">4〜12文字、英数字のみ</div><div style="font-size:10px;color:var(--tx3);margin-top:2px">数字のみ・英字のみ・混合 すべてOK</div></div>
+          <button class="btn bg2 bsm" style="flex-shrink:0;align-self:flex-start" onclick="genId()">自動生成</button>
+        </div>
+      </div>
+      <div class="frow">
+        <label>パスワード * <span style="font-weight:400;color:var(--tx3)">（4〜12文字、英数字）</span></label>
+        <div style="display:flex;gap:7px">
+          <div style="flex:1"><input id="r-pw" placeholder="例: 1234 / pass" maxlength="12" oninput="valPw()"/><div class="pws"><div class="pwb" id="pw-bar" style="width:0%"></div></div><div class="ferr" id="e-pw">4〜12文字、英数字のみ</div><div style="font-size:10px;color:var(--tx3);margin-top:2px" id="pw-hint">強度: —</div></div>
+          <button class="btn bg2 bsm" style="flex-shrink:0;align-self:flex-start" onclick="genPw()">自動生成</button>
+        </div>
+      </div>
+      <div style="background:var(--bl);border-radius:7px;padding:9px 11px;font-size:10px;color:var(--tx2);line-height:1.8">
+        💡 数字のみ（<code>1234</code>）・英字のみ（<code>abcd</code>）・混合（<code>T001</code>）すべて登録可
+      </div>
+    </div>
+    <div class="mfoot"><button class="btn bg2" onclick="closeModal('modal-reg')">キャンセル</button><button class="btn bp" id="reg-ok" onclick="submitReg()">登録する</button></div>
+  </div>
+</div>
+
+<div class="overlay hidden" id="modal-det">
+  <div class="modal" style="max-width:510px">
+    <div class="mhead"><div class="mttl" id="det-ttl">👤 詳細</div><button class="mclose" onclick="closeModal('modal-det')">×</button></div>
+    <div class="mbody" id="det-body"></div>
+    <div class="mfoot" id="det-foot"></div>
+  </div>
+</div>
+
+<div class="overlay hidden" id="modal-cfm">
+  <div class="modal" style="max-width:370px">
+    <div class="mhead" id="cfm-head"><div class="mttl" id="cfm-ttl">確認</div><button class="mclose" onclick="closeModal('modal-cfm')">×</button></div>
+    <div class="mbody"><p style="font-size:13px;color:var(--tx);line-height:1.7;margin-bottom:4px" id="cfm-msg"></p><p style="font-size:11px;color:var(--tx2)" id="cfm-sub"></p></div>
+    <div class="mfoot"><button class="btn bg2" onclick="closeModal('modal-cfm')">キャンセル</button><button class="btn" id="cfm-ok" onclick="cfmAction()">実行する</button></div>
+  </div>
+</div>
+
+<div class="overlay hidden" id="modal-imp">
+  <div class="modal" style="max-width:420px">
+    <div class="mhead"><div class="mttl">📥 CSV一括登録</div><button class="mclose" onclick="closeModal('modal-imp')">×</button></div>
+    <div class="mbody">
+      <div class="upz"><input type="file" accept=".csv"/><div style="font-size:26px;margin-bottom:5px">📄</div><div style="font-size:12px;font-weight:600;color:var(--pr);margin-bottom:2px">CSVをドラッグ&amp;ドロップ</div><div style="font-size:10px;color:var(--tx2)">またはクリックして選択</div></div>
+      <div style="background:var(--bl);border-radius:7px;padding:9px 11px;font-size:10px;color:var(--tx2);line-height:1.9;margin-top:4px">
+        <strong>フォーマット：</strong><code>姓,名,社員番号,営業所,役職,ログインID,パスワード</code>
+      </div>
+    </div>
+    <div class="mfoot"><button class="btn bg2" onclick="closeModal('modal-imp')">キャンセル</button><button class="btn bp" onclick="toast2('インポート完了（デモ）','var(--gn)');closeModal('modal-imp')">インポート実行</button></div>
+  </div>
+</div>
+
+
+<div class="overlay hidden" id="modal-add-content">
+  <div class="modal" style="max-width:460px">
+    <div class="mhead"><div class="mttl">➕ 教材を追加</div><button class="mclose" onclick="closeModal('modal-add-content')">×</button></div>
+    <div class="mbody">
+      <div class="frow"><label>教材タイトル *</label><input id="add-ttl" placeholder="例：項目08 危険の予測及び回避..."/></div>
+      <div class="frow"><label>🎬 YouTube動画URL *</label>
+        <input id="add-url" placeholder="https://youtu.be/xxxxx"/>
+        <div style="font-size:10px;color:var(--tx3);margin-top:3px">YouTubeで「限定公開」にした動画のURLを貼り付けてください</div>
+      </div>
+      <div class="frow"><label>カテゴリ</label>
+        <select id="add-cat">
+          <option>法規・法定12項目</option>
+          <option>安全運転</option>
+          <option>緊急対応</option>
+          <option>エコドライブ</option>
+          <option>KYT</option>
+          <option>自社教材</option>
+        </select>
+      </div>
+      <div class="frow"><label>サムネイル背景色</label>
+        <input type="color" id="add-color" value="#1a3a8c" style="height:36px;padding:2px;cursor:pointer;width:100%;border-radius:5px;border:1px solid var(--bd)"/>
+      </div>
+      <div style="background:var(--bl);border-radius:7px;padding:10px;font-size:11px;color:var(--tx2)">
+        💡 追加した教材はすぐにドライバー画面に表示されます
+      </div>
+    </div>
+    <div class="mfoot">
+      <button class="btn bg2" onclick="closeModal('modal-add-content')">キャンセル</button>
+      <button class="btn bp" onclick="submitAddContent()">✅ 追加する</button>
+    </div>
+  </div>
+</div>
+
+<div class="overlay hidden" id="modal-edit-content">
+  <div class="modal" style="max-width:460px">
+    <div class="mhead"><div class="mttl">✏️ 教材を編集</div><button class="mclose" onclick="closeModal('modal-edit-content')">×</button></div>
+    <div class="mbody">
+      <input type="hidden" id="edit-id"/>
+      <div class="frow"><label>教材タイトル *</label><input id="edit-ttl"/></div>
+      <div class="frow"><label>🎬 YouTube動画URL *</label>
+        <input id="edit-url" placeholder="https://youtu.be/xxxxx"/>
+        <div style="font-size:10px;color:var(--tx3);margin-top:3px">YouTubeで「限定公開」にした動画のURLを貼り付けてください</div>
+      </div>
+      <div class="frow"><label>カテゴリ</label>
+        <select id="edit-cat">
+          <option>法規・法定12項目</option>
+          <option>安全運転</option>
+          <option>緊急対応</option>
+          <option>エコドライブ</option>
+          <option>KYT</option>
+          <option>自社教材</option>
+        </select>
+      </div>
+      <div class="frow"><label>サムネイル背景色</label>
+        <input type="color" id="edit-color" value="#1a3a8c" style="height:36px;padding:2px;cursor:pointer;width:100%;border-radius:5px;border:1px solid var(--bd)"/>
+      </div>
+    </div>
+    <div class="mfoot">
+      <button class="btn bg2" onclick="closeModal('modal-edit-content')">キャンセル</button>
+      <button class="btn bp" onclick="submitEditContent()">✅ 更新する</button>
+    </div>
+  </div>
+</div>
+<div id="toast"></div>
+
+<script>
+/* ════════════════════════════════
+   SUPABASE 接続
+════════════════════════════════ */
+const SUPABASE_URL = 'https://hnrprrbyvhquvvmuvufd.supabase.co';
+const SUPABASE_KEY = 'sb_publishable_UBIypHJZ0nwDSzl6s6xvFg_O9_YA3UG';
+const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+/* ════════════════════════════════
+   DATA
+════════════════════════════════ */
+// デモ用ユーザー定義（実際はSupabase Auth）
+const DEMO_USERS = {
+  'admin0001': { pw:'admin1234', role:'admin', sei:'田中', mei:'管理者', branch:'本社' },
+  'suzuki01':  { pw:'1234', role:'driver', sei:'鈴木', mei:'一郎', branch:'大阪' },
+};
+let currentUser = null;
+
+const DVR_STAT=[{n:'山田 太郎',p:45,l:'7日前'},{n:'佐藤 花子',p:100,l:'今日'},{n:'鈴木 一郎',p:100,l:'昨日'},{n:'高橋 次郎',p:60,l:'3日前'},{n:'田中 美咲',p:0,l:'14日前'},{n:'伊藤 健太',p:85,l:'今日'}];
+const CNT_TBL=[{t:'項目01 トラックを運転する場合の心構え',c:'法規',v:'✓',q:'✓',tg:'全員',dl:'2026/05/31',s:'公開中',bg:'#162a5a'},{t:'春から始める暑さ対策',c:'安全運転',v:'✓',q:'✓',tg:'全員',dl:'2026/06/30',s:'公開中',bg:'#7a2010'},{t:'タイヤの脱落が起きたら',c:'緊急対応',v:'✓',q:'—',tg:'東京・大阪',dl:'—',s:'公開中',bg:'#2a1a0a'},{t:'冬道の安全運転',c:'安全運転',v:'✓',q:'✓',tg:'全員',dl:'2026/01/31',s:'終了',bg:'#0a2040'},{t:'バック走行の危険',c:'KYT',v:'✓',q:'✓',tg:'新人',dl:'—',s:'下書き',bg:'#1a2a10'}];
+const QMGR=[{t:'項目01 確認テスト',q:5,f:'選択式',p:70,a:84,c:142},{t:'暑さ対策 確認テスト',q:3,f:'選択式+○×',p:80,a:91,c:98}];
+const DLV=[{t:'項目01 トラックを運転する場合の心構え',tg:'全員(142名)',r:'必修',s:'2026/04/01',e:'2026/05/31',pct:78},{t:'春から始める暑さ対策',tg:'全員(142名)',r:'必修',s:'2026/04/15',e:'2026/06/30',pct:45}];
+const REP=[{nm:'佐藤 花子',cs:'安全運転基礎',s:'2025/01/05',e:'2025/01/10',sc:94,p:true},{nm:'鈴木 一郎',cs:'高速道路安全',s:'2025/01/08',e:'2025/01/15',sc:88,p:true},{nm:'山田 太郎',cs:'エコドライブ',s:'2025/01/15',e:'—',sc:'—',p:null}];
+const MCNT=[
+  {id:1,t:'事例22 その距離は本当に安全？',cat:'safety',bg:'linear-gradient(135deg,#1a2a5a,#2a4a8a)',th:'事例22',tags:['#今月'],month:'2026年4月',status:'progress'},
+  {id:2,t:'春から始める暑さ対策',cat:'safety',bg:'linear-gradient(135deg,#7a2010,#c04a20)',th:'春から始める暑さ対策',tags:['#今月'],month:'2026年4月',status:'progress'},
+  {id:3,t:'項目01 トラックを運転する場合の心構え',cat:'legal',bg:'linear-gradient(135deg,#162a5a,#2a4a8a)',th:'項目01',tags:['#今月','#法定12項目'],month:'2026年4月',status:'perfect'},
+  {id:4,t:'睡眠不足＝飲酒運転？',cat:'safety',bg:'linear-gradient(135deg,#0a1a3a,#2a3a6a)',th:'睡眠不足＝飲酒運転？',tags:[],month:'2025年12月',status:'perfect'},
+  {id:5,t:'二輪車',cat:'safety',bg:'linear-gradient(135deg,#3a1a10,#6a3a20)',th:'二輪車',tags:[],month:'2025年10月',status:'done'},
+  {id:6,t:'冬道の安全運転',cat:'safety',bg:'linear-gradient(135deg,#0a2040,#1a4060)',th:'冬道の安全運転',tags:[],month:'2025年9月',status:'none'},
+  {id:7,t:'KYT 交差点の危険予知',cat:'kyt',bg:'linear-gradient(135deg,#1a1a08,#3a3a18)',th:'KYT 交差点',tags:[],month:'2025年8月',status:'none'},
+  {id:8,t:'エコドライブ実践',cat:'eco',bg:'linear-gradient(135deg,#0a2a14,#1a4a24)',th:'エコドライブ',tags:[],month:'2025年7月',status:'none'},
+];
+const QUIZ_D=[
+  {q:'高速道路での安全な車間距離として最も適切なのはどれですか？',opts:['走行速度と同じメートル数','前車のテールランプが見える距離','2秒ルールで前車との時間距離を確保','車の全長の2倍'],ans:2,exp:'「2秒ルール」は国際的に推奨される車間距離の目安です。'},
+  {q:'大雨・濃霧などの悪天候時に最初に行うべき対応は？',opts:['速度を上げて早く到着する','ハザードランプを常時点灯','速度を落とし、ライトを点灯する','路肩に停車して回復を待つ'],ans:2,exp:'悪天候時は速度を落とし、ライトを点灯して視認性を確保します。'},
+  {q:'追い越し車線での長時間走行が禁止される主な理由は？',opts:['燃費が悪くなるから','後続車を妨げ交通の流れを乱すから','タイヤが摩耗しやすいから','法定速度を守りやすくなるから'],ans:1,exp:'追い越し車線は追い越しのためだけに使用します。長時間走行は「通行帯違反」となります。'},
+];
+let users=[
+  {id:1,sei:'山田',mei:'太郎',eid:'T-0021',br:'東京',role:'ドライバー',lid:'1021',pw:'1234',prog:45,last:'7日前',st:'act',ntm:false},
+  {id:2,sei:'佐藤',mei:'花子',eid:'T-0034',br:'東京',role:'リーダー',lid:'hana',pw:'pass',prog:100,last:'今日',st:'act',ntm:false},
+  {id:3,sei:'鈴木',mei:'一郎',eid:'O-0012',br:'大阪',role:'ドライバー',lid:'suzuki01',pw:'1234',prog:100,last:'昨日',st:'act',ntm:false},
+  {id:4,sei:'高橋',mei:'次郎',eid:'N-0008',br:'名古屋',role:'ドライバー',lid:'jiro',pw:'abcd',prog:60,last:'3日前',st:'act',ntm:true},
+  {id:5,sei:'田中',mei:'美咲',eid:'T-0055',br:'東京',role:'ドライバー',lid:'misa',pw:'1111',prog:0,last:'14日前',st:'sus',ntm:false},
+  {id:6,sei:'伊藤',mei:'健太',eid:'O-0023',br:'大阪',role:'ドライバー',lid:'kenta',pw:'2222',prog:85,last:'今日',st:'act',ntm:true},
+];
+let nId=7,cTab='all',cfmFn=null,eUid=null,qs=[],cslots=[],cstep=2;
+let mqst={q:0,ans:false,sc:0};
+const dava=['#1a3a8c','#b87a10','#1a7a42','#6a3a9c','#1a7a7a','#a03a1a'];
+const STEPS=['基本情報','ファイルアップロード','テスト作成','配信設定'];
+
+/* ════════════════════════════════
+   UTILS
+════════════════════════════════ */
+function toast2(m,c='var(--pr)'){const t=document.getElementById('toast');t.textContent=m;t.style.background=c;t.style.display='block';t.style.opacity='1';setTimeout(()=>{t.style.opacity='0';setTimeout(()=>t.style.display='none',300);},2400);}
+function openModal(id){document.getElementById(id).classList.remove('hidden');}
+function closeModal(id){document.getElementById(id).classList.add('hidden');}
+
+/* ════════════════════════════════
+   AUTH — ログイン・ログアウト・ルーティング
+════════════════════════════════ */
+function showScreen(name){
+  document.getElementById('login-screen').style.display='none';
+  document.getElementById('admin-screen').style.display='none';
+  document.getElementById('driver-screen').style.display='none';
+  if(name==='login'){
+    var ls=document.getElementById('login-screen');
+    ls.style.display='flex';
+    ls.style.minHeight='100vh';
+    ls.style.alignItems='center';
+    ls.style.justifyContent='center';
+    ls.style.background='linear-gradient(135deg,#1a3a8c 0%,#2560cc 100%)';
+    ls.style.padding='20px';
+  }
+  if(name==='admin')  document.getElementById('admin-screen').style.display='block';
+  if(name==='driver') document.getElementById('driver-screen').style.display='flex';
+}
+
+async function doLogin(){
+  const lid = document.getElementById('lid').value.trim();
+  const pw  = document.getElementById('lpw').value;
+  const err = document.getElementById('login-err');
+  const btn = document.getElementById('login-btn');
+  err.textContent='';
+
+  if(!lid||!pw){err.textContent='IDとパスワードを入力してください';return;}
+
+  btn.disabled=true;
+  btn.textContent='ログイン中...';
+
+  try {
+    // Supabaseのusersテーブルから検索
+    const { data, error } = await sb
+      .from('users')
+      .select('*')
+      .eq('login_id', lid)
+      .eq('password', pw)
+      .single();
+
+    if (error || !data) {
+      err.textContent='ログインIDまたはパスワードが違います';
+      document.getElementById('lid').classList.add('err');
+      document.getElementById('lpw').classList.add('err');
+      return;
+    }
+
+    if (data.status === 'suspended') {
+      err.textContent='このアカウントは休止中です。管理者にお問い合わせください。';
+      return;
+    }
+
+    // 最終ログイン更新
+    await sb.from('users').update({ last_login: '今日' }).eq('id', data.id);
+
+    currentUser = {
+      id: data.id,
+      sei: data.sei,
+      mei: data.mei,
+      branch: data.branch,
+      role: data.role,
+      lid: data.login_id
+    };
+    routeByRole();
+
+  } catch(e) {
+    err.textContent='接続エラーが発生しました。再度お試しください。';
+    console.error(e);
+  } finally {
+    btn.disabled=false;
+    btn.textContent='ログイン';
+  }
+}
+
+
+
+function clearErr(){
+  document.getElementById('login-err').textContent='';
+  document.getElementById('lid').classList.remove('err');
+  document.getElementById('lpw').classList.remove('err');
+}
+
+function routeByRole(){
+  if(!currentUser){showScreen('login');return;}
+  if(currentUser.role==='admin'||currentUser.role==='leader'){
+    document.getElementById('a-av').textContent=currentUser.sei[0];
+    document.getElementById('a-nm').textContent=currentUser.sei+' '+currentUser.mei;
+    document.getElementById('a-rl').textContent=currentUser.role==='admin'?'管理者':'リーダー';
+    showScreen('admin');
+    ago('dash');
+  } else {
+    document.getElementById('d-av').textContent=currentUser.sei[0];
+    document.getElementById('d-nm').textContent=currentUser.sei+' '+currentUser.mei;
+    showScreen('driver');
+    dgo('top');
+    initDriverScreenFromDB(); // Supabaseから教材を読み込む
+  }
+}
+
+function doLogout(){
+  currentUser=null;
+  document.getElementById('lid').value='';
+  document.getElementById('lpw').value='';
+  clearErr();
+  showScreen('login');
+  toast2('ログアウトしました');
+}
+
+/* ════════════════════════════════
+   ADMIN NAVIGATION
+════════════════════════════════ */
+function ago(id){
+  document.querySelectorAll('.sc').forEach(s=>s.classList.remove('on'));
+  document.getElementById('s-'+id).classList.add('on');
+  const M={dash:'ダッシュボード',list:'教材一覧',create:'新規コンテンツ作成',qmgr:'テスト管理',course:'コース設定',dlv:'配信・期限設定',users:'ユーザー管理',report:'レポート・帳票',cfg:'システム設定'};
+  document.getElementById('pg-ttl').textContent=M[id]||id;
+  document.querySelectorAll('.ni').forEach(n=>n.classList.remove('on'));
+  document.querySelectorAll('.ni').forEach(n=>{if(n.textContent.trim().startsWith(M[id]||'##'))n.classList.add('on');});
+  if(id==='report'){setTimeout(loadReport,100);}
+  if(id==='dash'){setTimeout(initDash,100);}
+  var tbrEl=document.getElementById('tbr');
+  tbrEl.innerHTML='';
+  if(id==='list'){
+    var b1=document.createElement('button');
+    b1.className='btn bp';b1.textContent='➕ 教材を追加';
+    b1.onclick=function(){showAddContentModal();};
+    tbrEl.appendChild(b1);
+  } else if(id==='users'){
+    var b2=document.createElement('button');
+    b2.className='btn bg2';b2.textContent='📥 CSV一括';
+    b2.onclick=function(){openModal('modal-imp');};
+    tbrEl.appendChild(b2);
+    var b3=document.createElement('button');
+    b3.className='btn bp';b3.textContent='➕ 新規登録';
+    b3.onclick=function(){openReg();};
+    tbrEl.appendChild(b3);
+  } else if(id==='report'){
+    var b4=document.createElement('button');
+    b4.className='btn bg2';b4.textContent='📥 CSV出力';
+    b4.onclick=function(){exportReportCSV();};
+    tbrEl.appendChild(b4);
+    var b5=document.createElement('button');
+    b5.className='btn bp';b5.textContent='📋 記録簿PDF';
+    b5.onclick=function(){window.open('report_generator.html','_blank');};
+    tbrEl.appendChild(b5);
+  }
+}
+
+/* ════════════════════════════════
+   DRIVER NAVIGATION
+════════════════════════════════ */
+function dgo(id){
+  document.querySelectorAll('.d-sc').forEach(s=>s.classList.remove('on'));
+  document.getElementById('ds-'+id).classList.add('on');
+  document.querySelectorAll('.d-ni').forEach(n=>n.classList.remove('on'));
+  document.getElementById('dn-'+id).classList.add('on');
+  if(id==='quiz'){mqst={q:0,ans:false,sc:0};renderMQ();}
+}
+
+/* ════════════════════════════════
+   DASHBOARD
+════════════════════════════════ */
+async function initDash(){
+  try {
+    // ユーザー数・受講データをSupabaseから取得
+    const {data:users} = await sb.from('users').select('*').neq('role','admin');
+    const {data:contents} = await sb.from('contents').select('id').eq('status','published');
+    const {data:results} = await sb.from('quiz_results').select('*');
+    const {data:progress} = await sb.from('progress').select('*');
+
+    const totalUsers = users?.length || 0;
+    const totalContents = contents?.length || 0;
+
+    // 完了者数（少なくとも1教材完了）
+    const completedUserIds = new Set((results||[]).filter(r=>r.passed).map(r=>r.user_id));
+    const completionRate = totalUsers > 0 ? Math.round(completedUserIds.size/totalUsers*100) : 0;
+
+    // 平均正答率
+    const scores = (results||[]).map(r=>r.score).filter(s=>s!=null);
+    const avgScore = scores.length > 0 ? Math.round(scores.reduce((a,b)=>a+b,0)/scores.length) : 0;
+
+    // 未完了（一度も受講していない）
+    const neverStarted = (users||[]).filter(u=>!(progress||[]).some(p=>p.user_id===u.id)).length;
+
+    // 統計カード更新
+    document.getElementById('dash-total').textContent = totalUsers;
+    document.getElementById('dash-rate').textContent = completionRate+'%';
+    document.getElementById('dash-avg').textContent = avgScore+'%';
+    document.getElementById('dash-unrec').textContent = neverStarted;
+
+    // ドライバー別進捗
+    const progMap = {};
+    (progress||[]).forEach(p=>{
+      if(!progMap[p.user_id]||p.progress_pct>progMap[p.user_id]) progMap[p.user_id]=p.progress_pct;
+    });
+    const resMap = {};
+    (results||[]).forEach(r=>{resMap[r.user_id]=(resMap[r.user_id]||0)+1;});
+
+    document.getElementById('dp-list').innerHTML=(users||[]).slice(0,6).map((u,i)=>{
+      const pct = resMap[u.id] ? Math.min(100, Math.round(resMap[u.id]/Math.max(1,totalContents)*100)) : (progMap[u.id]||0);
+      const color = pct===100?'var(--gn)':pct>60?'var(--pr3)':'var(--am)';
+      return `<div class="drow"><div class="dav2" style="background:${dava[i%dava.length]}">${u.sei[0]}</div><div style="flex:1;min-width:0"><div style="font-size:11px;font-weight:500">${u.sei} ${u.mei}</div><div class="dbw"><div class="db" style="width:${pct}%;background:${color}"></div></div></div><div style="font-size:11px;color:var(--tx2);min-width:28px;text-align:right">${pct}%</div></div>`;
+    }).join('') || '<div style="text-align:center;padding:16px;color:var(--tx3);font-size:12px">ドライバーが登録されていません</div>';
+
+    // 月別グラフ（今月の実績で更新）
+    const mo=['4月','5月','6月','7月','8月','9月','10月','11月','12月','1月','2月','3月'];
+    const now=new Date();
+    const thisMonth=now.getMonth(); // 0-11
+    const vl=[62,70,75,68,80,77,82,79,85,78,83,completionRate];
+    document.getElementById('m-bars').innerHTML=mo.map((m,i)=>`<div class="bw"><div class="bv">${vl[i]}</div><div class="bb" style="height:${vl[i]}px;background:${i===thisMonth?'var(--ac)':'var(--pr3)'};opacity:${.55+i*.04}"></div><div class="bl2">${m}</div></div>`).join('');
+
+    // ── アラート・通知を実データから生成 ──
+    const alerts = [];
+    const nowTime = now.getTime();
+    const day7 = 7 * 24 * 60 * 60 * 1000;
+    const day3 = 3 * 24 * 60 * 60 * 1000;
+
+    // ① 7日以上未ログインのドライバー
+    (users||[]).forEach(u => {
+      if(u.last_login && u.last_login !== '今日' && u.last_login !== '昨日' && u.last_login !== '未ログイン') {
+        const m = u.last_login.match(/(\d+)日前/);
+        if(m && parseInt(m[1]) >= 7) {
+          alerts.push({
+            color: '#e74c3c',
+            text: `${u.sei} ${u.mei}さんが${m[1]}日間未ログインです`,
+            time: '要確認'
+          });
+        }
+      }
+      // 一度も受講していない
+      if(u.last_login === '未ログイン' || !u.last_login) {
+        alerts.push({
+          color: 'var(--am)',
+          text: `${u.sei} ${u.mei}さんがまだ一度も受講していません`,
+          time: '未受講'
+        });
+      }
+    });
+
+    // ② テスト平均正答率が低いユーザー（80%未満）
+    const userScores = {};
+    (results||[]).forEach(r => {
+      if(!userScores[r.user_id]) userScores[r.user_id] = [];
+      userScores[r.user_id].push(r.score);
+    });
+    Object.entries(userScores).forEach(([uid, scores]) => {
+      const avg = Math.round(scores.reduce((a,b)=>a+b,0)/scores.length);
+      if(avg < 70) {
+        const u = (users||[]).find(u=>u.id===uid);
+        if(u) alerts.push({
+          color: 'var(--am)',
+          text: `${u.sei} ${u.mei}さんのテスト平均が${avg}点です（合格基準70点）`,
+          time: '要フォロー'
+        });
+      }
+    });
+
+    // ③ 登録ドライバー数の変化
+    const newUsers = (users||[]).filter(u => {
+      if(!u.created_at) return false;
+      return (nowTime - new Date(u.created_at).getTime()) < day7;
+    });
+    if(newUsers.length > 0) {
+      alerts.push({
+        color: 'var(--gn)',
+        text: `今週${newUsers.length}名の新しいドライバーが登録されました`,
+        time: '今週'
+      });
+    }
+
+    // ④ 受講完了のお知らせ
+    const recentDone = (results||[]).filter(r => {
+      if(!r.taken_at) return false;
+      return (nowTime - new Date(r.taken_at).getTime()) < day3 && r.passed;
+    });
+    if(recentDone.length > 0) {
+      alerts.push({
+        color: 'var(--pr3)',
+        text: `直近3日間で${recentDone.length}件のテストが合格しました`,
+        time: '最近'
+      });
+    }
+
+    // ⑤ アラートがない場合
+    if(alerts.length === 0) {
+      alerts.push({
+        color: 'var(--gn)',
+        text: '現在、対応が必要なアラートはありません',
+        time: '正常'
+      });
+    }
+
+    // アラートを表示（最大5件）
+    const alertContainer = document.querySelector('.card .ctit + div') || document.querySelector('[id="alert-list"]');
+    // アラートエリアを探して更新
+    const cards = document.querySelectorAll('#s-dash .card');
+    cards.forEach(card => {
+      const title = card.querySelector('.ctit');
+      if(title && title.textContent.includes('アラート')) {
+        card.innerHTML = '<div class="ctit">アラート・通知</div>' +
+          alerts.slice(0,5).map(a =>
+            `<div class="ar"><div class="ad" style="background:${a.color}"></div><div><div class="at">${a.text}</div><div class="atm">${a.time}</div></div></div>`
+          ).join('');
+      }
+    });
+
+  } catch(e){
+    console.warn('ダッシュボード読み込みエラー:',e);
+    // エラー時はデモデータで表示
+    document.getElementById('dp-list').innerHTML=DVR_STAT.map((d,i)=>`<div class="drow"><div class="dav2" style="background:${dava[i%dava.length]}">${d.n[0]}</div><div style="flex:1;min-width:0"><div style="font-size:11px;font-weight:500">${d.n}</div><div class="dbw"><div class="db" style="width:${d.p}%;background:${d.p===100?'var(--gn)':d.p>60?'var(--pr3)':'var(--am)'}"></div></div></div><div style="font-size:11px;color:var(--tx2);min-width:28px;text-align:right">${d.p}%</div></div>`).join('');
+    const mo=['4月','5月','6月','7月','8月','9月','10月','11月','12月','1月','2月','3月'],vl=[62,70,75,68,80,77,82,79,85,78,83,88];
+    document.getElementById('m-bars').innerHTML=mo.map((m,i)=>`<div class="bw"><div class="bv">${vl[i]}</div><div class="bb" style="height:${vl[i]}px;background:${i===9?'var(--ac)':'var(--pr3)'};opacity:${.55+i*.04}"></div><div class="bl2">${m}</div></div>`).join('');
+  }
+}
+async function initList(){
+  const tb=document.getElementById('list-tb');
+  tb.innerHTML='<tr><td colspan="6" style="text-align:center;padding:20px;color:var(--tx3)">読み込み中...</td></tr>';
+  try {
+    const {data:contents,error}=await sb.from('contents').select('*').order('created_at',{ascending:false});
+    if(error) throw error;
+    if(!contents||contents.length===0){
+      tb.innerHTML='<tr><td colspan="6" style="text-align:center;padding:20px;color:var(--tx3)">教材がまだ登録されていません<br><button class="btn bp bsm" style="margin-top:8px" onclick="showAddContentModal()">➕ 最初の教材を追加</button></td></tr>';
+      return;
+    }
+    tb.innerHTML=contents.map(c=>`<tr>
+      <td><div style="display:flex;align-items:center;gap:7px">
+        <div style="width:32px;height:21px;border-radius:3px;background:${c.thumb_color||'#1a3a8c'};flex-shrink:0"></div>
+        <strong style="color:var(--pr)">${c.title}</strong>
+      </div></td>
+      <td>${c.category}</td>
+      <td style="text-align:center">${c.video_url?'✓':'—'}</td>
+      <td><span class="pill ${c.status==='published'?'pg':c.status==='draft'?'pa':'pr2'}">${c.status==='published'?'公開中':c.status==='draft'?'下書き':'終了'}</span></td>
+      <td><div style="display:flex;gap:3px">
+        <button class="btn bg2 bsm" onclick="deleteContent('${c.id}','${c.title.replace(/'/g,'')}')">🗑 削除</button>
+      </div></td>
+    </tr>`).join('');
+  } catch(e){
+    tb.innerHTML='<tr><td colspan="6" style="text-align:center;padding:20px;color:var(--rd)">読み込みエラー: '+e.message+'</td></tr>';
+  }
+}
+
+async function deleteContent(id, title){
+  if(!confirm('「'+title+'」を削除しますか？\nドライバーの受講データも削除されます。')) return;
+  try {
+    const {error}=await sb.from('contents').delete().eq('id',id);
+    if(error) throw error;
+    toast2('🗑 削除しました','var(--rd)');
+    initList();
+  } catch(e){
+    toast2('⚠️ 削除に失敗しました','var(--rd)');
+  }
+}
+function initQmgr(){document.getElementById('qmgr-tb').innerHTML=QMGR.map(q=>`<tr><td><strong style="color:var(--pr)">${q.t}</strong></td><td style="text-align:center">${q.q}問</td><td>${q.f}</td><td style="text-align:center">${q.p}点</td><td><div style="display:flex;align-items:center;gap:5px"><div style="flex:1;background:var(--bl);border-radius:3px;height:4px;min-width:40px"><div style="width:${q.a}%;height:4px;border-radius:3px;background:${q.a>=80?'var(--gn)':'var(--am)'}"></div></div><span style="font-size:9px;color:var(--tx2)">${q.a}%</span></div></td><td>${q.c}名</td><td><div style="display:flex;gap:3px"><button class="btn bg2 bsm" onclick="ago('create');gst(3)">編集</button><button class="btn bsm bdng">削除</button></div></td></tr>`).join('');}
+function initDlv(){document.getElementById('dlv-tb').innerHTML=DLV.map(d=>`<tr><td><strong style="color:var(--pr)">${d.t}</strong></td><td>${d.tg}</td><td><span class="pill ${d.r==='必修'?'pr2':'pb'}">${d.r}</span></td><td>${d.s}</td><td>${d.e}</td><td><div style="display:flex;align-items:center;gap:5px"><div style="flex:1;background:var(--bl);border-radius:3px;height:4px;min-width:50px"><div style="width:${d.pct}%;height:4px;border-radius:3px;background:${d.pct>=80?'var(--gn)':d.pct>=50?'var(--pr3)':'var(--am)'}"></div></div><span style="font-size:9px;color:var(--tx2)">${d.pct}%</span></div></td><td><div style="display:flex;gap:3px"><button class="btn bg2 bsm">編集</button><button class="btn bsm bdng">停止</button></div></td></tr>`).join('');}
+function dtab(el,id){document.querySelectorAll('.tab').forEach(t=>t.classList.remove('on'));el.classList.add('on');['da','ds','de'].forEach(s=>{const e=document.getElementById(s);if(e)e.style.display=s===id?'block':'none';});}
+function initRep(){} // DBから読み込むのでデモデータ不要
+
+/* ════════════════════════════════
+   QUIZ EDITOR
+════════════════════════════════ */
+function addQ(type){qs.push({id:'q'+Date.now(),type,text:'',opts:type==='choice'?['','','','']:['○','×'],ans:0});renderQE();}
+function removeQ(id){qs=qs.filter(q=>q.id!==id);renderQE();}
+function renderQE(){
+  document.getElementById('q-empty').style.display=qs.length?'none':'block';
+  document.getElementById('q-list').innerHTML=qs.map((q,i)=>`<div class="qi"><div class="qih" onclick="var b=document.getElementById('qb-${q.id}');b.style.display=b.style.display==='none'?'block':'none'"><div class="qn">${i+1}</div><div style="flex:1;font-size:12px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${q.text||'（問題文を入力）'}</div><span style="font-size:10px;padding:2px 6px;border-radius:4px;background:var(--bl);color:var(--pr);font-weight:600">${{choice:'選択式',ox:'○×',text:'記述式'}[q.type]}</span><button style="background:none;border:none;cursor:pointer;color:var(--tx3);font-size:12px" onclick="event.stopPropagation();removeQ('${q.id}')">🗑</button></div><div class="qb" id="qb-${q.id}"><div class="frow"><label>問題文</label><textarea style="min-height:50px;resize:vertical;background:var(--bg);border:1px solid var(--bd);color:var(--tx);padding:7px;border-radius:5px;font-size:11px;font-family:inherit;width:100%" placeholder="問題文を入力..." oninput="qs.find(x=>x.id==='${q.id}').text=this.value">${q.text}</textarea></div>${q.type!=='text'?`<div style="font-size:10px;color:var(--tx2);margin-bottom:5px">選択肢（ラジオで正解を選択）</div><div class="qol">${q.opts.map((o,j)=>`<div class="qor"><input type="radio" style="accent-color:var(--gn);flex-shrink:0" name="a${q.id}" ${j===q.ans?'checked':''} onclick="qs.find(x=>x.id==='${q.id}').ans=${j}"/><span style="font-size:9px;color:var(--tx3);flex-shrink:0">正解</span><input type="text" value="${o}" placeholder="${q.type==='ox'?o:'選択肢'+(String.fromCharCode(65+j))}" ${q.type==='ox'?'readonly':''} onchange="qs.find(x=>x.id==='${q.id}').opts[${j}]=this.value"/></div>`).join('')}</div>${q.type==='choice'?`<button class="qaob" onclick="qs.find(x=>x.id==='${q.id}').opts.push('');renderQE()">＋ 選択肢を追加</button>`:''}`:`<div class="frow"><label>模範解答</label><textarea style="min-height:40px;resize:vertical;background:var(--bg);border:1px solid var(--bd);color:var(--tx);padding:7px;border-radius:5px;font-size:11px;font-family:inherit;width:100%" placeholder="模範解答..."></textarea></div>`}<div class="frow" style="margin-top:8px"><label>解説文</label><textarea style="min-height:40px;resize:vertical;background:var(--bg);border:1px solid var(--bd);color:var(--tx);padding:7px;border-radius:5px;font-size:11px;font-family:inherit;width:100%" placeholder="解説..."></textarea></div></div></div>`).join('');
+}
+function aiGen(){const btn=event.currentTarget;btn.textContent='⏳...';btn.disabled=true;setTimeout(()=>{qs=[...qs,{id:'ai1',type:'choice',text:'高速道路における最低速度は？',opts:['40km/h','50km/h','60km/h','70km/h'],ans:1},{id:'ai2',type:'ox',text:'高速道路での故障時は必ず一般道まで押して避難しなければならない。',opts:['○','×'],ans:1}];renderQE();btn.textContent='✨ AI生成';btn.disabled=false;},1300);}
+function gst(n){cstep=n;for(let i=1;i<=4;i++) document.getElementById('sp'+i).style.display=i===n?'block':'none';document.getElementById('steps-bar').innerHTML=STEPS.map((l,i)=>{const k=i+1;const cls=k<n?'step dn':k===n?'step on':'step';return `${i>0?'<div class="stl"></div>':''}<div class="${cls}"><div class="stc">${k<n?'✓':k}</div>${l}</div>`;}).join('');ago('create');}
+
+/* COURSE */
+function addSlot(){if(cslots.length<6){cslots.push(null);renderSlots();}}
+function renderSlots(){document.getElementById('cs-grid').innerHTML=cslots.map((c,i)=>`<div class="cslot ${c?'filled':''}" onclick="${c?'':'pickSlot('+i+')'}" style="position:relative"><div style="font-size:9px;font-weight:700;color:var(--tx3);margin-bottom:5px">STEP ${i+1}</div>${c?`<div style="display:flex;align-items:center;gap:7px"><div style="width:38px;height:25px;border-radius:3px;background:${c.bg};flex-shrink:0"></div><div style="font-size:11px;font-weight:500">${c.t}</div></div><button onclick="event.stopPropagation();cslots.splice(${i},1);renderSlots()" style="position:absolute;top:5px;right:5px;background:none;border:none;cursor:pointer;color:var(--tx3)">×</button>`:`<div style="text-align:center;font-size:10px;color:var(--tx3);padding-top:8px">クリックして追加</div>`}</div>`).join('');}
+function pickSlot(i){const c=CNT_TBL[i%CNT_TBL.length];cslots[i]={t:c.t,bg:c.bg};renderSlots();}
+function initLibPick(){document.getElementById('lib-pick').innerHTML=CNT_TBL.map(c=>`<div style="display:flex;align-items:center;gap:8px;padding:7px 9px;background:var(--bg);border-radius:5px;cursor:pointer;transition:.15s" onmouseenter="this.style.background='var(--bl)'" onmouseleave="this.style.background='var(--bg)'" onclick="cslots.push({t:'${c.t}',bg:'${c.bg}'});renderSlots()"><div style="width:38px;height:25px;border-radius:3px;background:${c.bg};flex-shrink:0"></div><div style="flex:1;min-width:0"><div style="font-size:11px;font-weight:500">${c.t}</div><div style="font-size:9px;color:var(--tx3)">${c.c}</div></div><span style="color:var(--pr3);font-size:15px">＋</span></div>`).join('');}
+
+/* UPLOAD */
+function hfile(e,t){Array.from(e.target.files).forEach(f=>addFI(f,t));}
+function addFI(f,t){const li=t==='vid'?'vid-list':'doc-list';const ext=f.name.split('.').pop().toLowerCase();const ic={'mp4':'🎬','mov':'🎬','pdf':'📄','pptx':'📊','xlsx':'📊','docx':'📝'}[ext]||'📁';const sz=(f.size/1024/1024).toFixed(1)+' MB';const d=document.createElement('div');d.className='fi';const uid='u'+Date.now();d.innerHTML=`<span style="font-size:17px">${ic}</span><div style="flex:1;min-width:0"><div style="font-size:11px;font-weight:500">${f.name}</div><div style="font-size:9px;color:var(--tx3)">${sz}</div><div class="fp"><div class="fb" id="${uid}b" style="width:0%"></div></div></div><span style="font-size:10px;font-weight:600" id="${uid}s">アップロード中...</span>`;document.getElementById(li).appendChild(d);let p=0;const ti=setInterval(()=>{p+=Math.random()*28;if(p>=100){p=100;clearInterval(ti);document.getElementById(uid+'s').textContent='✓ 完了';document.getElementById(uid+'s').style.color='var(--gn)';}document.getElementById(uid+'b').style.width=p+'%';},100);}
+function upThumb(){document.getElementById('th-prev').style.background=document.getElementById('thclr').value;document.getElementById('th-lbl').textContent=document.getElementById('ttl-inp').value||'タイトル未入力';}
+function addTag(e){if(e.key==='Enter'&&e.target.value.trim()){const v=e.target.value.trim();const t=v.startsWith('#')?v:'#'+v;const sp=document.createElement('span');sp.className='tagpill';sp.innerHTML=`${t}<button onclick="this.parentElement.remove()">×</button>`;document.getElementById('tginp').before(sp);e.target.value='';}}
+
+/* ════════════════════════════════
+   USER MANAGEMENT
+════════════════════════════════ */
+function updStats(){const tot=users.length,act=users.filter(u=>u.st==='act').length,sus=users.filter(u=>u.st==='sus').length,ntm=users.filter(u=>u.ntm).length;document.getElementById('st-tot').textContent=tot;document.getElementById('st-act').textContent=act;document.getElementById('st-sus').textContent=sus;document.getElementById('st-new').textContent=ntm;document.getElementById('cnt-all').textContent=tot;document.getElementById('cnt-act').textContent=act;document.getElementById('cnt-sus').textContent=sus;document.getElementById('sus-badge').textContent=sus;}
+function swTab(t){cTab=t;['all','act','sus'].forEach(x=>document.getElementById('tab-'+x).classList.toggle('on',x===t));renderUsers();}
+async function loadUsersFromDB(){
+  try {
+    const { data, error } = await sb.from('users').select('*').order('created_at');
+    if (error) throw error;
+    // DBのデータをローカルのusers配列に変換
+    users = data.map(u => ({
+      id: u.id,
+      sei: u.sei,
+      mei: u.mei,
+      eid: u.employee_id || '—',
+      br: u.branch,
+      role: u.role === 'admin' ? '管理者' : u.role === 'leader' ? 'リーダー' : 'ドライバー',
+      lid: u.login_id,
+      pw: u.password,
+      prog: u.progress || 0,
+      last: u.last_login || '未ログイン',
+      st: u.status === 'active' ? 'act' : 'sus',
+      ntm: u.new_this_month || false,
+      dbId: u.id
+    }));
+    updStats();
+    renderUsers();
+  } catch(e) {
+    console.warn('DB読み込みエラー、ローカルデータを使用:', e);
+    updStats();
+    renderUsers();
+  }
+}
+
+function renderUsers(){const q=(document.getElementById('usr-q').value||'').toLowerCase(),br=document.getElementById('usr-br').value,role=document.getElementById('usr-role').value;const list=users.filter(u=>{if(cTab==='act'&&u.st!=='act')return false;if(cTab==='sus'&&u.st!=='sus')return false;if(br&&u.br!==br)return false;if(role&&u.role!==role)return false;if(q&&!(u.sei+u.mei).toLowerCase().includes(q)&&!u.lid.toLowerCase().includes(q)&&!u.eid.toLowerCase().includes(q))return false;return true;});const tb=document.getElementById('user-tb');if(!list.length){tb.innerHTML=`<tr><td colspan="10" style="text-align:center;padding:26px;color:var(--tx3)">該当するユーザーがいません</td></tr>`;return;}tb.innerHTML=list.map((u,i)=>{const pc=u.prog===100?'var(--gn)':u.prog>60?'var(--pr3)':'var(--am)';return `<tr class="${u.st==='sus'?'suspended':''}"><td><input type="checkbox" class="rck" data-id="${u.id}" style="accent-color:var(--pr)" onchange="onRck()"/></td><td><div style="display:flex;align-items:center;gap:7px"><div style="width:24px;height:24px;border-radius:50%;background:${dava[i%dava.length]};color:#fff;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700">${u.sei[0]}</div><div><div style="font-size:12px;font-weight:600">${u.sei} ${u.mei}</div><div style="font-size:9px;color:var(--tx3)">${u.role}</div></div></div></td><td><span class="idb">${u.lid}</span></td><td style="color:var(--tx2)">${u.eid}</td><td>${u.br}</td><td>${u.role}</td><td><div style="display:flex;align-items:center;gap:5px"><div style="flex:1;background:var(--bl);border-radius:3px;height:4px;min-width:45px"><div style="width:${u.prog}%;height:4px;border-radius:3px;background:${pc}"></div></div><span style="font-size:9px;color:var(--tx2)">${u.prog}%</span></div></td><td style="color:var(--tx2)">${u.last}</td><td>${u.st==='act'?'<span class="pill pg">● アクティブ</span>':'<span class="pill pgy">⏸ 休止中</span>'}</td><td><div style="display:flex;gap:3px"><button class="btn bg2 bsm" onclick="openDet(${u.id})">詳細</button>${u.st==='act'?`<button class="btn bsm" style="background:var(--gyb);color:var(--gy);border:1px solid #d1d5db" onclick="cfmSus(${u.id})">⏸</button>`:`<button class="btn bsm bgn" onclick="cfmAct(${u.id})">▶</button>`}<button class="btn bsm bdng" onclick="cfmDel(${u.id})">🗑</button></div></td></tr>`;}).join('');}
+function toggleAll(v){document.querySelectorAll('.rck').forEach(c=>c.checked=v);onRck();}
+function onRck(){const n=document.querySelectorAll('.rck:checked').length;const b=document.getElementById('bulk-bar');b.style.display=n?'flex':'none';if(n)document.getElementById('bulk-cnt').textContent=n+'件選択中';}
+function getChk(){return[...document.querySelectorAll('.rck:checked')].map(c=>+c.dataset.id);}
+function bulkAct(){const ids=getChk();ids.forEach(id=>{const u=users.find(x=>x.id===id);if(u)u.st='act';});document.getElementById('bulk-bar').style.display='none';document.getElementById('chk-all').checked=false;updStats();renderUsers();toast2(`✅ ${ids.length}件をアクティブ化しました`,'var(--gn)');}
+function bulkSus(){const ids=getChk();ids.forEach(id=>{const u=users.find(x=>x.id===id);if(u)u.st='sus';});document.getElementById('bulk-bar').style.display='none';document.getElementById('chk-all').checked=false;updStats();renderUsers();toast2(`⏸ ${ids.length}件を休止しました`);}
+function bulkDel(){const ids=getChk();if(!confirm(`${ids.length}件のアカウントを削除しますか？`))return;users=users.filter(u=>!ids.includes(u.id));document.getElementById('bulk-bar').style.display='none';document.getElementById('chk-all').checked=false;updStats();renderUsers();toast2(`🗑 削除しました`,'var(--rd)');}
+function openReg(uid=null){eUid=uid;const u=uid?users.find(x=>x.id===uid):null;document.getElementById('reg-ttl').textContent=uid?'✏️ 編集':'👤 新規ドライバー登録';document.getElementById('r-sei').value=u?u.sei:'';document.getElementById('r-mei').value=u?u.mei:'';document.getElementById('r-eid').value=u?u.eid:'';document.getElementById('r-role').value=u?u.role:'ドライバー';document.getElementById('r-br').value=u?u.br:'';document.getElementById('r-id').value=u?u.lid:'';document.getElementById('r-pw').value=u?u.pw:'';document.getElementById('reg-ok').textContent=uid?'更新する':'登録する';['sei','mei','br','id','pw'].forEach(k=>{document.getElementById('r-'+k).classList.remove('err');document.getElementById('e-'+k).classList.remove('show');});document.getElementById('pw-bar').style.width='0%';document.getElementById('pw-hint').textContent='強度: —';openModal('modal-reg');}
+function genId(){const ch='abcdefghjkmnpqrstuvwxyz23456789';let s='';for(let i=0;i<4;i++)s+=ch[Math.floor(Math.random()*ch.length)];document.getElementById('r-id').value=s;valId();}
+function genPw(){const ch='abcdefghjkmnpqrstuvwxyz23456789';let s='';for(let i=0;i<4;i++)s+=ch[Math.floor(Math.random()*ch.length)];document.getElementById('r-pw').value=s;valPw();}
+function valId(){const v=document.getElementById('r-id').value;const ok=/^[a-zA-Z0-9]{4,12}$/.test(v);const dup=ok&&users.find(u=>u.lid===v&&u.id!==eUid);document.getElementById('r-id').classList.toggle('err',!!(v&&(!ok||dup)));const er=document.getElementById('e-id');er.textContent=dup?'このIDはすでに使用されています':'4〜12文字、英数字のみ';er.classList.toggle('show',!!(v&&(!ok||dup)));return ok&&!dup;}
+function valPw(){const v=document.getElementById('r-pw').value;const ok=/^[a-zA-Z0-9]{4,12}$/.test(v);document.getElementById('r-pw').classList.toggle('err',!!(v&&!ok));document.getElementById('e-pw').classList.toggle('show',!!(v&&!ok));if(!v){document.getElementById('pw-bar').style.width='0%';document.getElementById('pw-hint').textContent='強度: —';return ok;}const hn=/[0-9]/.test(v),ha=/[a-zA-Z]/.test(v),l=v.length;let str=0;if(l>=4)str++;if(l>=8)str++;if(hn&&ha)str++;if(l>=10)str++;const cs=['#e74c3c','#e67e22','#f1c40f','#2ecc71'],ls=['弱い','普通','強い','非常に強い'],idx=Math.max(0,str-1);document.getElementById('pw-bar').style.width=(str*25)+'%';document.getElementById('pw-bar').style.background=cs[idx];document.getElementById('pw-hint').textContent='強度: '+ls[idx];document.getElementById('pw-hint').style.color=cs[idx];return ok;}
+function submitReg(){const sei=document.getElementById('r-sei').value.trim(),mei=document.getElementById('r-mei').value.trim(),br=document.getElementById('r-br').value;let ok=true;if(!sei){document.getElementById('r-sei').classList.add('err');document.getElementById('e-sei').classList.add('show');ok=false;}else{document.getElementById('r-sei').classList.remove('err');document.getElementById('e-sei').classList.remove('show');}if(!mei){document.getElementById('r-mei').classList.add('err');document.getElementById('e-mei').classList.add('show');ok=false;}else{document.getElementById('r-mei').classList.remove('err');document.getElementById('e-mei').classList.remove('show');}if(!br){document.getElementById('r-br').classList.add('err');document.getElementById('e-br').classList.add('show');ok=false;}else{document.getElementById('r-br').classList.remove('err');document.getElementById('e-br').classList.remove('show');}if(!valId())ok=false;if(!valPw())ok=false;if(!ok)return;const lid=document.getElementById('r-id').value.trim(),pw=document.getElementById('r-pw').value.trim(),eid=document.getElementById('r-eid').value.trim()||'—',role=document.getElementById('r-role').value;if(eUid){const u=users.find(x=>x.id===eUid);if(u){u.sei=sei;u.mei=mei;u.eid=eid;u.br=br;u.role=role;u.lid=lid;u.pw=pw;}toast2('✅ 更新しました','var(--gn)');}else{users.push({id:nId++,sei,mei,eid,br,role,lid,pw,prog:0,last:'—',st:'act',ntm:true});toast2('✅ 登録しました','var(--gn)');}closeModal('modal-reg');updStats();renderUsers();}
+function openDet(uid){const u=users.find(x=>x.id===uid);if(!u)return;document.getElementById('det-ttl').textContent=`👤 ${u.sei} ${u.mei} さん`;const pc=u.prog===100?'var(--gn)':u.prog>60?'var(--pr3)':'var(--am)';document.getElementById('det-body').innerHTML=`<div style="display:flex;align-items:center;gap:13px;margin-bottom:14px"><div style="width:50px;height:50px;border-radius:50%;background:${dava[u.id%dava.length]};color:#fff;display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:700">${u.sei[0]}</div><div><div style="font-size:16px;font-weight:700;color:var(--pr);margin-bottom:3px">${u.sei} ${u.mei}</div><div style="font-size:11px;color:var(--tx2)">${u.role} · ${u.br} · ${u.eid}</div><div style="margin-top:4px">${u.st==='act'?'<span class="pill pg">● アクティブ</span>':'<span class="pill pgy">⏸ 休止中</span>'}</div></div></div><div style="display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-bottom:12px"><div style="background:var(--bg);border-radius:7px;padding:10px 12px"><div style="font-size:10px;color:var(--tx3);margin-bottom:4px">ログインID</div><span class="idb">${u.lid}</span></div><div style="background:var(--bg);border-radius:7px;padding:10px 12px"><div style="font-size:10px;color:var(--tx3);margin-bottom:4px">パスワード</div><span class="idb" style="cursor:pointer" onclick="var t=document.getElementById('pwt${uid}');var show=t.textContent!=='${u.pw}';t.textContent=show?'${u.pw}':'••••';t.className=show?'':'pwm'"><span id="pwt${uid}" class="pwm">••••</span></span></div><div style="background:var(--bg);border-radius:7px;padding:10px 12px"><div style="font-size:10px;color:var(--tx3);margin-bottom:4px">受講進捗</div><div style="display:flex;align-items:center;gap:7px"><div style="flex:1;background:var(--bl);border-radius:4px;height:6px"><div style="width:${u.prog}%;height:6px;border-radius:4px;background:${pc}"></div></div><span style="font-size:12px;font-weight:700;color:${pc}">${u.prog}%</span></div></div><div style="background:var(--bg);border-radius:7px;padding:10px 12px"><div style="font-size:10px;color:var(--tx3);margin-bottom:4px">最終ログイン</div><div style="font-size:12px;font-weight:500">${u.last}</div></div></div>${u.st==='sus'?`<div style="background:var(--amb);border-radius:7px;padding:9px 12px;font-size:11px;color:var(--am)">⚠️ このアカウントは現在休止中です。</div>`:``}`;document.getElementById('det-foot').innerHTML=`<button class="btn bg2" onclick="closeModal('modal-det')">閉じる</button><button class="btn bg2" onclick="closeModal('modal-det');openReg(${uid})">✏️ 編集</button>${u.st==='act'?`<button class="btn" style="background:var(--gyb);color:var(--gy);border:1px solid #d1d5db" onclick="closeModal('modal-det');cfmSus(${uid})">⏸ 休止</button>`:`<button class="btn bgn" onclick="closeModal('modal-det');cfmAct(${uid})">▶ 再開</button>`}<button class="btn bdng" onclick="closeModal('modal-det');cfmDel(${uid})">🗑 削除</button>`;openModal('modal-det');}
+function cfmSus(uid){const u=users.find(x=>x.id===uid);document.getElementById('cfm-head').style.background='var(--gy)';document.getElementById('cfm-ttl').textContent='⏸ アカウント休止';document.getElementById('cfm-msg').textContent=`${u.sei} ${u.mei} さんを休止しますか？`;document.getElementById('cfm-sub').textContent='休止中はログインできなくなります。';const b=document.getElementById('cfm-ok');b.style.cssText='background:var(--gy);color:#fff;';b.textContent='休止する';cfmFn=()=>{const u2=users.find(x=>x.id===uid);if(u2)sb.from('users').update({status:'suspended'}).eq('id',uid).then(()=>{loadUsersFromDB();toast2('⏸ 休止しました');});closeModal('modal-cfm');};openModal('modal-cfm');}
+function cfmAct(uid){const u=users.find(x=>x.id===uid);document.getElementById('cfm-head').style.background='var(--gn)';document.getElementById('cfm-ttl').textContent='▶ アカウント再開';document.getElementById('cfm-msg').textContent=`${u.sei} ${u.mei} さんを再開しますか？`;document.getElementById('cfm-sub').textContent='再開するとドライバーがログインできるようになります。';const b=document.getElementById('cfm-ok');b.className='btn bgn';b.style.cssText='';b.textContent='再開する';cfmFn=()=>{const u2=users.find(x=>x.id===uid);if(u2)sb.from('users').update({status:'active'}).eq('id',uid).then(()=>{loadUsersFromDB();toast2('✅ 再開しました','var(--gn)');});closeModal('modal-cfm');};openModal('modal-cfm');}
+function cfmDel(uid){const u=users.find(x=>x.id===uid);document.getElementById('cfm-head').style.background='var(--rd)';document.getElementById('cfm-ttl').textContent='🗑 削除';document.getElementById('cfm-msg').textContent=`${u.sei} ${u.mei} さんを削除しますか？`;document.getElementById('cfm-sub').textContent='この操作は取り消せません。';const b=document.getElementById('cfm-ok');b.className='btn bp';b.style.cssText='background:var(--rd);color:#fff;';b.textContent='削除する';cfmFn=()=>{sb.from('users').delete().eq('id',uid).then(()=>{loadUsersFromDB();toast2('🗑 削除しました','var(--rd)');});closeModal('modal-cfm');};openModal('modal-cfm');}
+function cfmAction(){if(cfmFn){cfmFn();cfmFn=null;}}
+
+/* ════════════════════════════════
+   DRIVER SCREEN
+════════════════════════════════ */
+function stHTML(s){
+  if(s==='perfect') return '<span class="st-pf">🏆 満点合格</span>';
+  if(s==='done')    return '<span class="st-dn">✓ 完了</span>';
+  if(s==='progress')return '<span class="st-pr">▶ 受講中</span>';
+  return '<span class="st-nn">— 未受講</span>';
+}
+function thImg(c,w,h){
+  return `<div style="width:${w};height:${h};background:${c.bg};display:flex;align-items:flex-end;padding:4px 5px;position:relative">
+    <div class="d-item-ic">▶</div>
+    <span style="color:#fff;font-size:9px;font-weight:700;text-shadow:0 1px 3px rgba(0,0,0,.7)">${c.th}</span>
+  </div>`;
+}
+function openVideo(contentId){
+  // 動画プレイヤーページへ遷移（同じフォルダのvideo_player.htmlを開く）
+  const name=encodeURIComponent((currentUser.sei||'')+(currentUser.mei||''));
+  const uid=currentUser.id||'';
+  const url=`video_player.html?content_id=${contentId}&user_id=${uid}&name=${name}`;
+  window.open(url,'_blank');
+}
+
+// Supabaseから教材を読み込んでドライバー画面を初期化
+async function initDriverScreenFromDB(){
+  try {
+    // 公開中の教材をすべて取得
+    const {data:contents, error} = await sb.from('contents').select('*').eq('status','published').order('created_at',{ascending:false});
+    if(error||!contents||contents.length===0){
+      // DBに教材がなければデモデータで表示
+      initDTop();initDLib('all');initDHist();
+      return;
+    }
+
+    // 自分の進捗を取得
+    let progressMap={};
+    let resultMap={};
+    if(currentUser&&currentUser.id){
+      const {data:prog} = await sb.from('progress').select('*').eq('user_id',currentUser.id);
+      if(prog) prog.forEach(p=>progressMap[p.content_id]=p);
+      const {data:res} = await sb.from('quiz_results').select('*').eq('user_id',currentUser.id);
+      if(res) res.forEach(r=>resultMap[r.content_id]=r);
+    }
+
+    function getStatus(contentId){
+      const res=resultMap[contentId];
+      const prog=progressMap[contentId];
+      if(res&&res.passed) return 'perfect';
+      if(res) return 'done';
+      if(prog&&prog.status==='completed') return 'done';
+      if(prog&&prog.progress_pct>0) return 'progress';
+      return 'none';
+    }
+    function getDate(c){
+      const d=new Date(c.created_at);
+      return d.getFullYear()+'年'+(d.getMonth()+1)+'月';
+    }
+    function contentCard(c, size='normal'){
+      const status=getStatus(c.id);
+      const bg=c.thumb_color||'#1a3a8c';
+      const thumb=size==='small'
+        ?`<div style="width:64px;height:42px;border-radius:5px;overflow:hidden;flex-shrink:0;background:${bg};display:flex;align-items:flex-end;padding:4px 5px"><span style="color:#fff;font-size:8px;font-weight:700;text-shadow:0 1px 3px rgba(0,0,0,.7)">${c.title.slice(0,8)}</span></div>`
+        :`<div class="d-item-thumb" style="position:relative;background:${bg};display:flex;align-items:flex-end;padding:4px 6px"><div class="d-item-ic">▶</div><span style="color:#fff;font-size:9px;font-weight:700;text-shadow:0 1px 3px rgba(0,0,0,.7)">${c.title.slice(0,10)}</span></div>`;
+      return `<div class="d-item" onclick="openVideo('${c.id}')" style="cursor:pointer">
+        ${thumb}
+        <div class="d-item-info">
+          <div class="d-item-title">${c.title}</div>
+          <div class="d-item-date">${getDate(c)}</div>
+          ${stHTML(status)}
+        </div>
+      </div>`;
+    }
+
+    // 今月の教材（タグに今月含む または 最新3件）
+    const thisMonth=contents.filter(c=>(c.tags||[]).some(t=>t.includes('今月'))).slice(0,3);
+    const todayContents=thisMonth.length>0?thisMonth:contents.slice(0,3);
+    document.getElementById('d-today').innerHTML=todayContents.map(c=>{
+      const bg=c.thumb_color||'#1a3a8c';
+      return `<div class="d-thumb" onclick="openVideo('${c.id}')" style="cursor:pointer;background:${bg};display:flex;align-items:flex-end;padding:5px 6px">
+        <div class="d-thumb-ic">▶</div>
+        <span class="d-thumb-lbl">${c.title.slice(0,8)}</span>
+      </div>`;
+    }).join('');
+
+    // 未受講・受講中
+    const unrec=contents.filter(c=>['none','progress'].includes(getStatus(c.id)));
+    document.getElementById('d-unrec').innerHTML=unrec.length
+      ?unrec.map(c=>contentCard(c)).join('')
+      :'<div style="padding:16px;text-align:center;color:var(--tx3);font-size:12px">未受講の教材はありません</div>';
+
+    // 完了
+    const done=contents.filter(c=>['done','perfect'].includes(getStatus(c.id)));
+    document.getElementById('d-done').innerHTML=done.length
+      ?done.map(c=>contentCard(c)).join('')
+      :'<div style="padding:16px;text-align:center;color:var(--tx3);font-size:12px">完了した教材はまだありません</div>';
+
+    // ライブラリ
+    document.getElementById('d-lib').innerHTML=contents.map(c=>contentCard(c)).join('');
+
+    // 統計カード更新
+    const doneEl=document.getElementById('hist-done');
+    const avgEl=document.getElementById('hist-avg');
+    if(doneEl) doneEl.textContent=done.length+'件';
+    const scores=Object.values(resultMap).filter(r=>r.score!=null).map(r=>r.score);
+    if(avgEl) avgEl.textContent=scores.length?Math.round(scores.reduce((a,b)=>a+b,0)/scores.length)+'%':'—';
+
+    // 履歴
+    document.getElementById('d-hist').innerHTML=done.length
+      ?done.map(c=>{
+        const res=resultMap[c.id];
+        const bg=c.thumb_color||'#1a3a8c';
+        return `<div class="d-mc" style="display:flex;gap:9px;align-items:center">
+          <div style="width:64px;height:42px;border-radius:5px;overflow:hidden;flex-shrink:0;background:${bg};display:flex;align-items:flex-end;padding:4px 5px">
+            <span style="color:#fff;font-size:8px;font-weight:700">${c.title.slice(0,8)}</span>
+          </div>
+          <div style="flex:1;min-width:0">
+            <div style="font-size:12px;font-weight:600;margin-bottom:2px">${c.title}</div>
+            <div style="font-size:9px;color:var(--tx3);margin-bottom:3px">${getDate(c)}</div>
+            <div style="display:flex;align-items:center;justify-content:space-between">
+              ${stHTML(getStatus(c.id))}
+              ${res?`<span style="font-size:11px;font-weight:700;color:${res.passed?'var(--gn)':'var(--rd)'}">${res.score}点</span>`:''}
+            </div>
+          </div>
+        </div>`;
+      }).join('')
+      :'<div style="padding:16px;text-align:center;color:var(--tx3);font-size:12px">受講履歴はまだありません</div>';
+
+  } catch(e){
+    console.warn('教材読み込みエラー:', e);
+    initDTop();initDLib('all');initDHist();
+  }
+}
+
+function initDTop(){
+  const today=MCNT.filter(c=>c.tags.some(t=>t.includes('今月')));
+  document.getElementById('d-today').innerHTML=today.map(c=>`<div class="d-thumb"><div class="d-thumb-img" style="background:${c.bg}"><div class="d-thumb-ic">▶</div><span class="d-thumb-lbl">${c.th}</span></div></div>`).join('');
+  document.getElementById('d-unrec').innerHTML=MCNT.filter(c=>c.status==='none'||c.status==='progress').map(c=>`<div class="d-item">${thImg(c,'100%','100%')}<div class="d-item-info"><div class="d-item-title">${c.t}</div><div class="d-item-date">${c.month}</div>${stHTML(c.status)}</div></div>`).join('');
+  document.getElementById('d-done').innerHTML=MCNT.filter(c=>c.status==='done'||c.status==='perfect').map(c=>`<div class="d-item">${thImg(c,'100%','100%')}<div class="d-item-info"><div class="d-item-title">${c.t}</div><div class="d-item-date">${c.month}</div>${stHTML(c.status)}</div></div>`).join('');
+}
+function initDLib(cat){
+  const list=cat==='all'?MCNT:MCNT.filter(c=>c.cat===cat);
+  document.getElementById('d-lib').innerHTML=list.map(c=>`<div class="d-item">${thImg(c,'100%','100%')}<div class="d-item-info"><div class="d-item-title">${c.t}</div><div class="d-item-date">${c.month}</div>${stHTML(c.status)}</div></div>`).join('');
+}
+function dfc(el,cat){
+  document.querySelectorAll('#d-chips .btn').forEach(b=>{b.classList.remove('bp');b.classList.add('bg2');});
+  el.classList.remove('bg2');el.classList.add('bp');
+  initDLib(cat);
+}
+function initDHist(){
+  document.getElementById('d-hist').innerHTML=MCNT.filter(c=>c.status==='done'||c.status==='perfect').map(c=>`<div class="d-mc" style="display:flex;gap:9px;align-items:center"><div style="width:64px;height:42px;border-radius:5px;overflow:hidden;flex-shrink:0">${thImg(c,'100%','100%')}</div><div style="flex:1;min-width:0"><div style="font-size:12px;font-weight:600;margin-bottom:2px">${c.t}</div><div style="font-size:9px;color:var(--tx3);margin-bottom:3px">${c.month}</div><div style="display:flex;align-items:center;justify-content:space-between">${stHTML(c.status)}</div></div></div>`).join('');
+}
+
+/* DRIVER QUIZ */
+function renderMQ(){
+  const w=document.getElementById('d-qwrap');
+  if(mqst.q>=QUIZ_D.length){
+    const pct=Math.round(mqst.sc/QUIZ_D.length*100);const pass=pct>=70;
+    w.innerHTML=`<div class="qresult"><div style="font-size:38px;margin-bottom:7px">${pass?'🏆':'📚'}</div><div style="font-size:48px;font-weight:700;color:var(--pr)">${pct}点</div><div style="font-size:14px;color:${pass?'var(--gn)':'var(--rd)'};margin:5px 0;font-weight:600">${pass?'合格 ✓':'不合格 — 再挑戦が必要です'}</div><div style="font-size:10px;color:var(--tx2);margin-bottom:14px">${mqst.sc}問 / ${QUIZ_D.length}問 正解</div><div style="display:flex;gap:7px;justify-content:center"><button class="btn bp" onclick="mqst={q:0,ans:false,sc:0};renderMQ()">🔄 再受験</button><button class="btn bg2" onclick="dgo('top')">← 戻る</button></div></div>`;
+    return;
+  }
+  const q=QUIZ_D[mqst.q];
+  w.innerHTML=`<div class="qctr">問 ${mqst.q+1} / ${QUIZ_D.length}</div>
+    <div class="qpbar"><div class="qpfill" style="width:${Math.round(mqst.q/QUIZ_D.length*100)}%"></div></div>
+    <div class="qtxt">${q.q}</div>
+    <div class="qopts">${q.opts.map((o,i)=>`<div class="qopt" id="mq${i}" onclick="mPick(${i})"><div class="ocr">${String.fromCharCode(65+i)}</div>${o}</div>`).join('')}</div>
+    <div id="mqfb"></div>
+    <button class="btn bp" id="mqnext" style="display:none;width:100%" onclick="mqst.q++;mqst.ans=false;renderMQ()">次の問題 →</button>`;
+}
+function mPick(i){if(mqst.ans)return;mqst.ans=true;const q=QUIZ_D[mqst.q];const ok=i===q.ans;if(ok)mqst.sc++;for(let j=0;j<q.opts.length;j++){const el=document.getElementById('mq'+j);if(el){if(j===q.ans)el.classList.add('ok');else if(j===i&&!ok)el.classList.add('ng');}}document.getElementById('mqfb').innerHTML=`<div class="qfb ${ok?'ok':'ng'}">${ok?'✓ 正解！':'✗ 不正解。正解は「'+q.opts[q.ans]+'」です。'}<br><span style="font-size:10px;opacity:.9">${q.exp}</span></div>`;document.getElementById('mqnext').style.display='block';}
+
+
+/* ════════════════════════════════
+/* ════════════════════════════════
+   INIT
+════════════════════════════════ */
+// 配信チェックリスト（管理者画面のSTEP4用）
+function initDrvChk(){document.getElementById('drv-chk').innerHTML=users.map((u,i)=>`<div style="display:flex;align-items:center;gap:8px;padding:6px 9px;background:var(--bg);border-radius:5px" data-br="${u.br}"><input type="checkbox" checked style="accent-color:var(--pr);width:13px;height:13px"/><div style="width:22px;height:22px;border-radius:50%;background:${dava[i%dava.length]};color:#fff;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700">${u.sei[0]}</div><div><div style="font-size:11px;font-weight:500">${u.sei} ${u.mei}</div><div style="font-size:9px;color:var(--tx3)">${u.br}</div></div><span class="pill ${u.st==='act'?'pg':'pgy'}" style="margin-left:auto">${u.st==='act'?'有効':'休止'}</span></div>`).join('');}
+function chkAll(v){document.querySelectorAll('#drv-chk input[type=checkbox]').forEach(c=>c.checked=v);}
+function fltBr(br){document.querySelectorAll('#drv-chk [data-br]').forEach(r=>r.style.display=(br==='all'||r.dataset.br===br)?'flex':'none');}
+
+
+async function loadReport(){
+  const branch=document.getElementById('rep-branch').value;
+  const statusFilter=document.getElementById('rep-status').value;
+
+  try {
+    // ユーザー一覧取得
+    let uq=sb.from('users').select('*').neq('role','admin').eq('status','active').order('sei');
+    if(branch) uq=uq.eq('branch',branch);
+    const {data:users} = await uq;
+    if(!users||users.length===0){
+      document.getElementById('rep-matrix-wrap').innerHTML='<div style="text-align:center;padding:32px;color:var(--tx3)">ドライバーが登録されていません</div>';
+      return;
+    }
+
+    // 教材一覧取得
+    const {data:contents} = await sb.from('contents').select('*').eq('status','published').order('created_at');
+
+    // 進捗・結果取得
+    const {data:allProgress} = await sb.from('progress').select('*');
+    const {data:allResults} = await sb.from('quiz_results').select('*');
+
+    // マップ作成
+    const progMap={};
+    (allProgress||[]).forEach(p=>{progMap[p.user_id+'_'+p.content_id]=p;});
+    const resMap={};
+    (allResults||[]).forEach(r=>{
+      const key=r.user_id+'_'+r.content_id;
+      if(!resMap[key]||new Date(r.taken_at)>new Date(resMap[key].taken_at)) resMap[key]=r;
+    });
+
+    // 統計計算
+    let doneCount=0,progCount=0,noneCount=0;
+    const reportRows=users.map(u=>{
+      const statuses=(contents||[]).map(c=>{
+        const prog=progMap[u.id+'_'+c.id];
+        const res=resMap[u.id+'_'+c.id];
+        if(res){
+          const d=new Date(res.taken_at);
+          return {type:'done',label:`完了(${d.getMonth()+1}/${d.getDate()})`,score:res.score,passed:res.passed};
+        }
+        if(prog&&prog.status==='in_progress') return {type:'prog',label:'受講中'};
+        if(prog&&prog.status==='completed') return {type:'done',label:`完了`};
+        return {type:'none',label:'未受講'};
+      });
+      // 統計
+      statuses.forEach(s=>{if(s.type==='done')doneCount++;else if(s.type==='prog')progCount++;else noneCount++;});
+      return {user:u,statuses};
+    });
+
+    // フィルター
+    const filtered=statusFilter
+      ?reportRows.filter(r=>r.statuses.some(s=>{
+          if(statusFilter==='not_started') return s.type==='none';
+          if(statusFilter==='completed') return s.type==='done';
+          return true;
+        }))
+      :reportRows;
+
+    // 統計表示
+    document.getElementById('rep-total').textContent=users.length+'名';
+    document.getElementById('rep-done').textContent=Math.round(doneCount/Math.max(1,users.length*(contents||[]).length)*100)+'%';
+    document.getElementById('rep-prog').textContent=progCount+'件';
+    document.getElementById('rep-none').textContent=noneCount+'件';
+
+    // テーブル生成
+    const contentHeaders=(contents||[]).map(c=>`<th>${c.title.slice(0,12)}${c.title.length>12?'...':''}</th>`).join('');
+    const rows=filtered.map(({user,statuses})=>{
+      const cells=statuses.map(s=>{
+        const cls=s.type==='done'?'status-done':s.type==='prog'?'status-prog':s.type==='none'?'status-none':'status-na';
+        const score=s.score!=null?` <span style="font-size:9px;opacity:.8">(${s.score}点)</span>`:'';
+        return `<td class="${cls}">${s.label}${score}</td>`;
+      }).join('');
+      return `<tr>
+        <td class="name-cell">${user.sei} ${user.mei}<br><span style="font-size:9px;color:var(--tx3)">${user.branch}</span></td>
+        ${cells}
+      </tr>`;
+    }).join('');
+
+    document.getElementById('rep-matrix-wrap').innerHTML=`
+      <div class="twrap" style="overflow-x:auto">
+        <table class="rep-table">
+          <thead><tr><th class="name-col">受講者名</th>${contentHeaders}</tr></thead>
+          <tbody>${rows||'<tr><td colspan="99" style="text-align:center;padding:20px;color:var(--tx3)">該当するデータがありません</td></tr>'}</tbody>
+        </table>
+      </div>
+      <div style="margin-top:10px;font-size:11px;color:var(--tx2)">
+        凡例：<span class="status-done" style="padding:2px 8px;border-radius:4px;background:var(--gnb)">完了</span>
+        <span class="status-prog" style="padding:2px 8px;border-radius:4px;background:var(--amb);margin:0 6px">受講中</span>
+        <span class="status-none" style="padding:2px 8px;border-radius:4px">未受講</span>
+      </div>`;
+
+    // 営業所フィルターを更新
+    const branches=[...new Set(users.map(u=>u.branch))].filter(Boolean);
+    const bsel=document.getElementById('rep-branch');
+    const curVal=bsel.value;
+    bsel.innerHTML='<option value="">全営業所</option>'+branches.map(b=>`<option value="${b}"${b===curVal?' selected':''}>${b}</option>`).join('');
+
+  } catch(e){
+    console.error('レポート読み込みエラー:',e);
+    document.getElementById('rep-matrix-wrap').innerHTML='<div style="text-align:center;padding:32px;color:var(--rd)">データの読み込みに失敗しました</div>';
+  }
+}
+
+function exportReportCSV(){
+  const table=document.querySelector('.rep-table');
+  if(!table){toast2('先にレポートを読み込んでください');return;}
+  let csv='';
+  table.querySelectorAll('tr').forEach(row=>{
+    const cells=[...row.querySelectorAll('th,td')].map(c=>'"'+c.innerText.replace(/"/g,'""').replace(/\n/g,' ')+'"');
+    csv+=cells.join(',')+('\n');
+  });
+  const bom='\uFEFF';
+  const blob=new Blob([bom+csv],{type:'text/csv;charset=utf-8'});
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(blob);
+  a.download='torarep_report_'+new Date().toISOString().split('T')[0]+'.csv';
+  a.click();
+  toast2('📥 CSVを出力しました','var(--gn)');
+}
+
+function saveCfg(){
+  const cfgEl=document.getElementById('cfg-company');
+  if(cfgEl){
+    localStorage.setItem('torarep_company', cfgEl.value);
+  }
+  toast2('✅ 設定を保存しました','var(--gn)');
+}
+
+
+async function publishContent(){
+  const title=document.getElementById('ttl-inp')?.value?.trim();
+  const videoUrl=document.getElementById('video-url-inp')?.value?.trim();
+  if(!title){toast2('⚠️ タイトルを入力してください','var(--rd)');return;}
+
+  // カテゴリ・タグ取得
+  const catEl=document.querySelector('#sp1 select');
+  const category=catEl?catEl.value:'安全運転';
+  const tags=[...document.querySelectorAll('.tagpill')].map(t=>t.textContent.replace('×','').trim()).filter(Boolean);
+  const thumbColor=document.getElementById('thclr')?.value||'#1a3a8c';
+
+  try {
+    const {data,error}=await sb.from('contents').insert({
+      title,
+      category,
+      video_url: videoUrl||null,
+      tags,
+      thumb_color: thumbColor,
+      status:'published'
+    }).select().single();
+    if(error) throw error;
+    toast2('✅ 公開しました！教材一覧に追加されました。','var(--gn)');
+    setTimeout(()=>ago('list'),1500);
+  } catch(e){
+    toast2('⚠️ 保存に失敗しました: '+e.message,'var(--rd)');
+    console.error(e);
+  }
+}
+
+
+
+function editContent(id, title, videoUrl, category, color){
+  document.getElementById('edit-id').value = id;
+  document.getElementById('edit-ttl').value = title;
+  document.getElementById('edit-url').value = videoUrl;
+  document.getElementById('edit-cat').value = category;
+  document.getElementById('edit-color').value = color || '#1a3a8c';
+  openModal('modal-edit-content');
+}
+
+async function submitEditContent(){
+  const id = document.getElementById('edit-id').value;
+  const title = document.getElementById('edit-ttl').value.trim();
+  const url = document.getElementById('edit-url').value.trim();
+  const cat = document.getElementById('edit-cat').value;
+  const color = document.getElementById('edit-color').value;
+  if(!title){ toast2('⚠️ タイトルを入力してください','var(--rd)'); return; }
+  if(!url){ toast2('⚠️ YouTube URLを入力してください','var(--rd)'); return; }
+  try {
+    const {error} = await sb.from('contents').update({
+      title, video_url: url, category: cat, thumb_color: color
+    }).eq('id', id);
+    if(error) throw error;
+    toast2('✅ 更新しました','var(--gn)');
+    closeModal('modal-edit-content');
+    initList();
+  } catch(e){
+    toast2('⚠️ 更新に失敗しました','var(--rd)');
+    console.error(e);
+  }
+}
+
+function showAddContentModal(){
+  openModal('modal-add-content');
+  document.getElementById('add-ttl').value='';
+  document.getElementById('add-url').value='';
+  document.getElementById('add-cat').value='法規・法定12項目';
+  document.getElementById('add-color').value='#1a3a8c';
+}
+
+async function submitAddContent(){
+  const title=document.getElementById('add-ttl').value.trim();
+  const url=document.getElementById('add-url').value.trim();
+  const cat=document.getElementById('add-cat').value;
+  const color=document.getElementById('add-color').value;
+  if(!title){toast2('⚠️ タイトルを入力してください','var(--rd)');return;}
+  if(!url){toast2('⚠️ YouTube URLを入力してください','var(--rd)');return;}
+  try {
+    const {error}=await sb.from('contents').insert({
+      title, category:cat, video_url:url,
+      thumb_color:color, status:'published',
+      tags:[]
+    });
+    if(error) throw error;
+    toast2('✅ 教材を追加しました','var(--gn)');
+    closeModal('modal-add-content');
+    initList();
+  } catch(e){
+    toast2('⚠️ 保存に失敗しました','var(--rd)');
+    console.error(e);
+  }
+}
+
+function openRecordSheet(){
+  const name = encodeURIComponent((currentUser.sei||'')+(currentUser.mei?(' '+currentUser.mei):''));
+  const uid = currentUser.id||'';
+  // 会社名はシステム設定のinputから直接取得
+  const cfgEl = document.getElementById('cfg-company');
+  const company = encodeURIComponent(cfgEl ? cfgEl.value : (localStorage.getItem('torarep_company')||''));
+  const branch = encodeURIComponent(currentUser.branch||'');
+  const url = 'report_generator.html?admin_name='+name+'&user_id='+uid+'&company='+company+'&branch='+branch;
+  window.open(url, '_blank');
+}
+
+// 全データ初期化
+setTimeout(function(){
+  const _savedCo=localStorage.getItem('torarep_company');
+  if(_savedCo){const _el=document.getElementById('cfg-company');if(_el)_el.value=_savedCo;}
+}, 100); // localStorage復元
+initDash();initList();initDlv();initQmgr();initRep();initLibPick();
+loadUsersFromDB().then(()=>initDrvChk()); // Supabaseからユーザー読み込み
+cslots=[null,null,null];renderSlots();
+initDTop();initDLib('all');initDHist();
+gst(2);
+
+// 最初はログイン画面
+showScreen('login');
+</script>
+</body>
+</html>

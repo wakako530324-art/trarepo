@@ -1,0 +1,555 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>トラレポ - 動画受講</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+:root{
+  --pr:#1a3a8c;--pr2:#1e4aad;--pr3:#2560cc;
+  --ac:#e8c020;
+  --bl:#e8f0fb;--bm:#c5d8f8;
+  --tx:#1a2540;--tx2:#4a5e80;--tx3:#8a9bba;
+  --bg:#f0f4f8;--wh:#fff;
+  --bd:#d0daf0;--bd2:#e4ecfa;
+  --gn:#1a7a42;--gnb:#eaf6ee;
+  --rd:#c0392b;--rdb:#fdf0ef;
+  --am:#b87a10;
+  --r:10px;
+}
+body{font-family:'Meiryo','Yu Gothic',system-ui,sans-serif;background:var(--bg);color:var(--tx);font-size:13px;min-height:100vh;}
+
+/* ── WRAPPER（スマホUIを維持） ── */
+.wrap{max-width:430px;margin:0 auto;min-height:100vh;background:var(--wh);display:flex;flex-direction:column;box-shadow:0 0 30px rgba(26,58,140,0.12);}
+@media(min-width:430px){body{display:flex;justify-content:center;}  .wrap{min-height:100vh;}}
+
+/* ── HEADER ── */
+.hdr{background:var(--pr);padding:0 14px;height:50px;display:flex;align-items:center;gap:10px;flex-shrink:0;}
+.hdr-back{background:none;border:none;color:rgba(255,255,255,.7);font-size:20px;cursor:pointer;padding:0;}
+.hdr-back:hover{color:#fff;}
+.hdr-ttl{font-size:14px;font-weight:700;color:#fff;flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+
+/* ── VIDEO PLAYER ── */
+.video-wrap{background:#000;width:100%;aspect-ratio:16/9;position:relative;flex-shrink:0;}
+.video-wrap video{width:100%;height:100%;object-fit:contain;}
+.video-overlay{position:absolute;inset:0;background:rgba(0,0,0,0.5);display:flex;align-items:center;justify-content:center;cursor:pointer;}
+.play-btn{width:60px;height:60px;background:rgba(255,255,255,0.9);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:24px;}
+
+/* ── PROGRESS BAR ── */
+.vprog-wrap{background:#1a1a2e;padding:8px 14px;flex-shrink:0;}
+.vprog-bar{background:#333;border-radius:3px;height:4px;cursor:pointer;position:relative;}
+.vprog-fill{height:4px;border-radius:3px;background:var(--pr3);transition:width .1s;}
+.vprog-info{display:flex;justify-content:space-between;margin-top:5px;font-size:10px;color:#aaa;}
+.vprog-watched{color:var(--ac);font-weight:600;}
+
+/* ── CONTENT ── */
+.content{flex:1;overflow-y:auto;padding:16px;}
+
+.info-card{background:var(--wh);border:1px solid var(--bd2);border-radius:var(--r);padding:14px;margin-bottom:14px;}
+.info-title{font-size:15px;font-weight:700;color:var(--tx);margin-bottom:6px;line-height:1.4;}
+.info-meta{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px;}
+.tag{background:var(--bl);color:var(--pr);font-size:10px;font-weight:600;padding:2px 8px;border-radius:10px;}
+.info-desc{font-size:12px;color:var(--tx2);line-height:1.7;}
+
+/* 視聴進捗 */
+.watch-status{display:flex;align-items:center;gap:10px;padding:12px 14px;border-radius:8px;margin-bottom:14px;}
+.watch-status.watching{background:#fff3cd;border:1px solid #ffc107;}
+.watch-status.done{background:var(--gnb);border:1px solid #a8d8b8;}
+.watch-status.not-started{background:var(--bl);border:1px solid var(--bm);}
+.ws-icon{font-size:22px;}
+.ws-text{flex:1;}
+.ws-title{font-size:12px;font-weight:700;}
+.ws-sub{font-size:10px;color:var(--tx2);margin-top:2px;}
+.ws-pct{font-size:20px;font-weight:700;color:var(--pr);}
+
+/* テストカード */
+.quiz-card{background:var(--wh);border:1px solid var(--bd2);border-radius:var(--r);overflow:hidden;margin-bottom:14px;}
+.quiz-head{background:var(--pr);padding:12px 16px;display:flex;align-items:center;gap:10px;}
+.quiz-head-ttl{font-size:13px;font-weight:700;color:#fff;}
+.quiz-head-sub{font-size:10px;color:rgba(255,255,255,.7);}
+.quiz-body{padding:16px;}
+.quiz-locked{text-align:center;padding:20px;color:var(--tx3);}
+.quiz-locked .lock-icon{font-size:32px;margin-bottom:8px;}
+.quiz-locked p{font-size:12px;}
+
+/* 問題 */
+.q-item{margin-bottom:18px;}
+.q-text{font-size:13px;font-weight:500;color:var(--tx);margin-bottom:10px;line-height:1.6;}
+.q-num{display:inline-block;background:var(--pr);color:#fff;font-size:10px;font-weight:700;padding:1px 7px;border-radius:4px;margin-right:6px;}
+.q-opts{display:flex;flex-direction:column;gap:6px;}
+.q-opt{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:7px;border:1.5px solid var(--bd);background:var(--bg);cursor:pointer;transition:.15s;font-size:12px;}
+.q-opt:hover{border-color:var(--pr3);background:var(--bp);}
+.q-opt.selected{border-color:var(--pr);background:var(--bl);}
+.q-opt.correct{border-color:var(--gn);background:var(--gnb);}
+.q-opt.wrong{border-color:var(--rd);background:var(--rdb);}
+.q-opt input[type=radio]{accent-color:var(--pr);flex-shrink:0;}
+.q-fb{margin-top:8px;padding:8px 11px;border-radius:6px;font-size:11px;line-height:1.6;}
+.q-fb.ok{background:var(--gnb);border:1px solid #a8d8b8;color:var(--gn);}
+.q-fb.ng{background:var(--rdb);border:1px solid #f0bab5;color:var(--rd);}
+
+/* 感想入力 */
+.comment-section{margin-top:16px;}
+.comment-label{font-size:12px;font-weight:700;color:var(--tx);margin-bottom:6px;}
+.comment-textarea{width:100%;background:var(--bg);border:1.5px solid var(--bd);color:var(--tx);padding:10px 12px;border-radius:7px;font-size:12px;font-family:inherit;min-height:80px;resize:vertical;}
+.comment-textarea:focus{outline:2px solid var(--pr3);outline-offset:-1px;background:var(--wh);}
+
+/* ボタン */
+.btn{padding:10px 18px;border-radius:7px;border:none;cursor:pointer;font-size:13px;font-weight:600;font-family:inherit;transition:.15s;}
+.btn-p{background:var(--pr);color:#fff;width:100%;padding:14px;font-size:14px;margin-top:14px;}
+.btn-p:hover{background:var(--pr2);}
+.btn-p:disabled{opacity:.5;cursor:not-allowed;}
+
+/* 結果 */
+.result-card{background:var(--wh);border:1px solid var(--bd2);border-radius:var(--r);padding:24px;text-align:center;margin-bottom:14px;}
+.result-icon{font-size:48px;margin-bottom:10px;}
+.result-score{font-size:52px;font-weight:700;color:var(--pr);line-height:1;}
+.result-label{font-size:14px;font-weight:700;margin:8px 0;}
+.result-sub{font-size:11px;color:var(--tx2);}
+.result-pass{color:var(--gn);}
+.result-fail{color:var(--rd);}
+
+/* 完了バッジ */
+.done-badge{background:var(--gnb);border:1px solid #a8d8b8;border-radius:var(--r);padding:14px;display:flex;align-items:center;gap:12px;margin-bottom:14px;}
+.done-badge-icon{font-size:28px;}
+.done-badge-text{flex:1;}
+.done-badge-title{font-size:13px;font-weight:700;color:var(--gn);}
+.done-badge-sub{font-size:11px;color:var(--tx2);margin-top:2px;}
+
+#toast{position:fixed;bottom:16px;left:50%;transform:translateX(-50%);background:var(--pr);color:#fff;padding:9px 18px;border-radius:8px;font-size:12px;font-weight:500;display:none;z-index:300;white-space:nowrap;}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <!-- HEADER -->
+  <div class="hdr">
+    <button class="hdr-back" onclick="history.back()">←</button>
+    <div class="hdr-ttl" id="hdr-ttl">教材を読み込み中...</div>
+  </div>
+
+  <!-- VIDEO -->
+  <div class="video-wrap" id="video-wrap">
+    <video id="main-video" preload="metadata" playsinline
+      onplay="onPlay()" onpause="onPause()" ontimeupdate="onTimeUpdate()" onended="onEnded()">
+      <source id="video-src" src="" type="video/mp4"/>
+      お使いのブラウザは動画再生に対応していません。
+    </video>
+    <div class="video-overlay" id="video-overlay" onclick="togglePlay()">
+      <div class="play-btn" id="play-btn-icon">▶</div>
+    </div>
+  </div>
+
+  <!-- VIDEO PROGRESS -->
+  <div class="vprog-wrap">
+    <div class="vprog-bar" id="vprog-bar" onclick="seekVideo(event)">
+      <div class="vprog-fill" id="vprog-fill" style="width:0%"></div>
+    </div>
+    <div class="vprog-info">
+      <span id="time-current">0:00</span>
+      <span class="vprog-watched" id="watch-pct">0% 視聴済み</span>
+      <span id="time-total">0:00</span>
+    </div>
+  </div>
+
+  <!-- CONTENT -->
+  <div class="content">
+
+    <!-- 視聴ステータス -->
+    <div class="watch-status not-started" id="watch-status">
+      <div class="ws-icon">🎬</div>
+      <div class="ws-text">
+        <div class="ws-title" id="ws-title">動画を視聴してください</div>
+        <div class="ws-sub" id="ws-sub">視聴後「✓ 視聴完了」ボタンを押してください</div>
+      </div>
+      <div class="ws-pct" id="ws-pct">0%</div>
+    </div>
+
+    <!-- 視聴完了ボタン（常に表示） -->
+    <div id="complete-btn-wrap" style="padding:12px 0 0 0;">
+      <button id="complete-btn" onclick="manualUnlock()" style="
+        width:100%;padding:14px;border-radius:8px;border:none;
+        background:#e8c020;color:#1a2540;
+        font-size:15px;font-weight:700;font-family:inherit;
+        cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;">
+        ✓ 視聴完了 → テストに進む
+      </button>
+      <div style="text-align:center;font-size:10px;color:var(--tx3);margin-top:6px">
+        動画を最後まで視聴してからボタンを押してください
+      </div>
+    </div>
+
+    <!-- 教材情報 -->
+    <div class="info-card">
+      <div class="info-title" id="content-title">読み込み中...</div>
+      <div class="info-meta" id="content-tags"></div>
+      <div class="info-desc" id="content-desc"></div>
+    </div>
+
+    <!-- テスト -->
+    <div class="quiz-card" id="quiz-card">
+      <div class="quiz-head">
+        <div>
+          <div class="quiz-head-ttl">✏️ 確認テスト</div>
+          <div class="quiz-head-sub" id="quiz-head-sub">動画を95%以上視聴するとテストが解放されます</div>
+        </div>
+      </div>
+      <div class="quiz-body" id="quiz-body">
+        <div class="quiz-locked">
+          <div class="lock-icon">🔒</div>
+          <p>動画を最後まで視聴すると<br>テストが解放されます</p>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /content -->
+</div><!-- /wrap -->
+
+<div id="toast"></div>
+
+<script>
+const SUPABASE_URL = 'https://hnrprrbyvhquvvmuvufd.supabase.co';
+const SUPABASE_KEY = 'sb_publishable_UBIypHJZ0nwDSzl6s6xvFg_O9_YA3UG';
+const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+// URLパラメータからコンテンツIDとユーザーIDを取得
+const params = new URLSearchParams(location.search);
+const contentId = params.get('content_id');
+const userId = params.get('user_id');
+const userName = decodeURIComponent(params.get('name') || '');
+
+let contentData = null;
+let quizData = [];
+let watchPct = 0;
+let quizUnlocked = false;
+let quizSubmitted = false;
+let isPlaying = false;
+let watchInterval = null;
+
+function toast(msg){
+  const t=document.getElementById('toast');t.textContent=msg;t.style.display='block';
+  setTimeout(()=>t.style.display='none',2500);
+}
+function fmtTime(s){const m=Math.floor(s/60);return m+':'+(Math.floor(s%60)+'').padStart(2,'0');}
+
+// ── 動画コントロール ──
+function togglePlay(){
+  const v=document.getElementById('main-video');
+  if(v.paused) v.play(); else v.pause();
+}
+function onPlay(){
+  document.getElementById('video-overlay').style.display='none';
+  isPlaying=true;
+  // 定期的に視聴進捗を保存
+  watchInterval = setInterval(saveWatchProgress, 10000);
+}
+function onPause(){
+  document.getElementById('video-overlay').style.display='flex';
+  document.getElementById('play-btn-icon').textContent='▶';
+  isPlaying=false;
+  clearInterval(watchInterval);
+  saveWatchProgress();
+}
+function onTimeUpdate(){
+  const v=document.getElementById('main-video');
+  if(!v.duration) return;
+  const pct=Math.round(v.currentTime/v.duration*100);
+  document.getElementById('vprog-fill').style.width=pct+'%';
+  document.getElementById('time-current').textContent=fmtTime(v.currentTime);
+  document.getElementById('time-total').textContent=fmtTime(v.duration);
+  document.getElementById('watch-pct').textContent=pct+'% 視聴済み';
+  document.getElementById('ws-pct').textContent=pct+'%';
+  watchPct=Math.max(watchPct,pct);
+
+  // ステータス更新
+  const ws=document.getElementById('watch-status');
+  const wsTitle=document.getElementById('ws-title');
+  const wsSub=document.getElementById('ws-sub');
+  if(pct>=95){
+    ws.className='watch-status done';
+    wsTitle.textContent='✓ 視聴完了！';
+    wsSub.textContent='テストに挑戦してください';
+    if(!quizUnlocked){quizUnlocked=true;renderQuiz();}
+  } else if(pct>0){
+    ws.className='watch-status watching';
+    wsTitle.textContent='▶ 視聴中...';
+    wsSub.textContent=`あと${95-pct}%でテストが解放されます`;
+  }
+}
+function onEnded(){
+  onPause();
+  watchPct=100;
+  if(!quizUnlocked){quizUnlocked=true;renderQuiz();}
+  saveWatchProgress();
+}
+function seekVideo(e){
+  const v=document.getElementById('main-video');
+  if(!v.duration) return;
+  const bar=document.getElementById('vprog-bar');
+  const rect=bar.getBoundingClientRect();
+  const pct=(e.clientX-rect.left)/rect.width;
+  v.currentTime=pct*v.duration;
+}
+
+// ── データ読み込み ──
+async function loadContent(){
+  if(!contentId){
+    document.getElementById('content-title').textContent='教材IDが指定されていません';
+    return;
+  }
+  try {
+    // 教材データ取得
+    const {data:content, error} = await sb.from('contents').select('*').eq('id',contentId).single();
+    if(!error && content){
+      // quiz_questionsを別取得
+      const {data:qdata} = await sb.from('quiz_questions').select('*').eq('content_id',contentId).order('question_no');
+      content.quiz_questions = qdata || [];
+    }
+    if(error||!content){document.getElementById('content-title').textContent='教材が見つかりません';return;}
+    contentData=content;
+    quizData=content.quiz_questions||[];
+
+    // UI更新
+    document.getElementById('hdr-ttl').textContent=content.title;
+    document.getElementById('content-title').textContent=content.title;
+    document.getElementById('content-desc').textContent=content.description||'';
+    document.getElementById('content-tags').innerHTML=(content.tags||[]).map(t=>`<span class="tag">${t}</span>`).join('');
+
+    // 動画URL設定
+    if(content.video_url){
+      // YouTube/Vimeoの場合はiframeで表示
+      if(content.video_url.includes('youtube.com')||content.video_url.includes('youtu.be')){
+        setupYoutube(content.video_url);
+      } else if(content.video_url.includes('vimeo.com')){
+        setupVimeo(content.video_url);
+      } else {
+        // 直接URLまたはSupabase Storage
+        document.getElementById('video-src').src=content.video_url;
+        document.getElementById('main-video').load();
+      }
+    } else {
+      document.getElementById('video-wrap').innerHTML=`<div style="display:flex;align-items:center;justify-content:center;height:100%;color:#fff;font-size:13px;padding:20px;text-align:center">動画がまだアップロードされていません</div>`;
+    }
+
+    // 既存の進捗取得
+    if(userId){
+      const {data:prog} = await sb.from('progress').select('*').eq('user_id',userId).eq('content_id',contentId).single();
+      if(prog){
+        watchPct=prog.progress_pct||0;
+        if(watchPct>=95){quizUnlocked=true;renderQuiz();}
+      }
+      // テスト結果取得
+      const {data:result} = await sb.from('quiz_results').select('*').eq('user_id',userId).eq('content_id',contentId).order('taken_at',{ascending:false}).limit(1);
+      if(result&&result.length>0){
+        quizSubmitted=true;
+        showResult(result[0].score,result[0].passed,result[0].comment||'');
+      }
+    }
+
+  } catch(e){
+    console.error(e);
+    document.getElementById('content-title').textContent='読み込みエラー';
+  }
+}
+
+// YouTube埋め込み
+function setupYoutube(url){
+  let videoId='';
+  const m1=url.match(/youtu\.be\/([^?]+)/);
+  const m2=url.match(/youtube\.com\/watch\?v=([^&]+)/);
+  if(m1) videoId=m1[1];
+  else if(m2) videoId=m2[1];
+  if(!videoId){
+    document.getElementById('video-wrap').innerHTML='<div style="display:flex;align-items:center;justify-content:center;height:100%;color:#fff;font-size:13px">動画URLが無効です</div>';
+    return;
+  }
+
+  // iframeに差し替え
+  const iframe=document.createElement('iframe');
+  iframe.src='https://www.youtube.com/embed/'+videoId+'?rel=0&modestbranding=1';
+  iframe.style.cssText='width:100%;height:100%;border:none;';
+  iframe.allow='accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share';
+  iframe.allowFullscreen=true;
+  const wrap=document.getElementById('video-wrap');
+  wrap.innerHTML='';
+  wrap.appendChild(iframe);
+
+  // プログレスバーを「視聴完了ボタン」に変更
+  document.getElementById('vprog-wrap').innerHTML=
+    '<div style="background:#1a1a2e;padding:10px 14px;display:flex;align-items:center;justify-content:space-between">'
+    +'<span style="color:#aaa;font-size:11px">動画を最後まで視聴したら右のボタンを押してください</span>'
+    +'<button onclick="manualUnlock()" style="background:#e8c020;color:#1a2540;border:none;border-radius:6px;padding:8px 16px;font-size:12px;font-weight:700;font-family:inherit;cursor:pointer;white-space:nowrap">✓ 視聴完了</button>'
+    +'</div>';
+
+  // ウォッチステータスも更新
+  const ws=document.getElementById('watch-status');
+  ws.className='watch-status not-started';
+  ws.innerHTML=
+    '<div class="ws-icon">🎬</div>'
+    +'<div class="ws-text"><div class="ws-title">動画を視聴してください</div>'
+    +'<div class="ws-sub">視聴後「✓ 視聴完了」ボタンを押すとテストが解放されます</div></div>';
+}
+
+function manualUnlock(){
+  watchPct=100;
+  quizUnlocked=true;
+  // 完了ボタンを非表示
+  const cbw=document.getElementById('complete-btn-wrap');
+  if(cbw) cbw.style.display='none';
+  const ws=document.getElementById('watch-status');
+  ws.className='watch-status done';
+  ws.innerHTML='<div class="ws-icon">✅</div><div class="ws-text"><div class="ws-title">視聴完了！下のテストに回答してください</div></div>';
+  renderQuiz();
+  // テストカードまでスクロール
+  setTimeout(()=>{
+    const qc=document.getElementById('quiz-card');
+    if(qc) qc.scrollIntoView({behavior:'smooth'});
+  },300);
+  saveWatchProgress();
+}
+
+// ── 進捗保存 ──
+async function saveWatchProgress(){
+  if(!userId||!contentId) return;
+  try {
+    const status=watchPct>=95?'completed':'in_progress';
+    const now=new Date().toISOString();
+    await sb.from('progress').upsert({
+      user_id:userId,
+      content_id:contentId,
+      status,
+      progress_pct:watchPct,
+      started_at:now,
+      completed_at:watchPct>=95?now:null
+    },{onConflict:'user_id,content_id'});
+  } catch(e){console.warn('進捗保存エラー:',e);}
+}
+
+// ── テスト表示 ──
+function renderQuiz(){
+  if(quizSubmitted) return;
+  const body=document.getElementById('quiz-body');
+  document.getElementById('quiz-head-sub').textContent=`${quizData.length}問 / 合格70点以上`;
+  if(quizData.length===0){
+    body.innerHTML=`<div style="text-align:center;padding:20px;color:var(--tx3)">このコンテンツにはテストがありません</div>`;
+    return;
+  }
+  // 問題をソート
+  const questions=[...quizData].sort((a,b)=>(a.question_no||0)-(b.question_no||0));
+  body.innerHTML=`
+    <div id="q-list">
+      ${questions.map((q,i)=>renderQuestion(q,i)).join('')}
+    </div>
+    <div class="comment-section">
+      <div class="comment-label">📝 受講後の感想・コメント</div>
+      <textarea class="comment-textarea" id="comment-input" placeholder="学んだことや気をつけようと思ったことを入力してください..."></textarea>
+    </div>
+    <button class="btn btn-p" id="submit-btn" onclick="submitQuiz()">✅ テストを提出する</button>`;
+}
+
+function renderQuestion(q,i){
+  const opts=Array.isArray(q.options)?q.options:(JSON.parse(q.options||'[]'));
+  return `<div class="q-item" id="qitem-${q.id}">
+    <div class="q-text"><span class="q-num">問${i+1}</span>${q.question_text}</div>
+    <div class="q-opts">
+      ${q.question_type==='ox'
+        ?['○','×'].map((o,j)=>`<label class="q-opt" id="opt-${q.id}-${j}"><input type="radio" name="q${q.id}" value="${j}" onchange="selectOpt('${q.id}',${j})"/>${o}</label>`).join('')
+        :opts.map((o,j)=>`<label class="q-opt" id="opt-${q.id}-${j}"><input type="radio" name="q${q.id}" value="${j}" onchange="selectOpt('${q.id}',${j})"/>${o}</label>`).join('')}
+    </div>
+    <div id="fb-${q.id}"></div>
+  </div>`;
+}
+
+function selectOpt(qid,j){
+  document.querySelectorAll(`[id^="opt-${qid}-"]`).forEach(el=>el.classList.remove('selected'));
+  document.getElementById(`opt-${qid}-${j}`).classList.add('selected');
+}
+
+async function submitQuiz(){
+  const questions=[...quizData].sort((a,b)=>(a.question_no||0)-(b.question_no||0));
+  // 全問回答チェック
+  let allAnswered=true;
+  questions.forEach(q=>{
+    const sel=document.querySelector(`input[name="q${q.id}"]:checked`);
+    if(!sel) allAnswered=false;
+  });
+  if(!allAnswered){toast('⚠️ 全ての問題に回答してください');return;}
+
+  // 採点
+  let correct=0;
+  const answers=[];
+  questions.forEach((q,i)=>{
+    const sel=document.querySelector(`input[name="q${q.id}"]:checked`);
+    const ans=parseInt(sel.value);
+    const isCorrect=ans===q.correct_ans;
+    if(isCorrect) correct++;
+    answers.push({questionId:q.id,answer:ans,correct:isCorrect});
+
+    // フィードバック表示
+    const opts=Array.isArray(q.options)?q.options:(JSON.parse(q.options||'[]'));
+    const answerText=q.question_type==='ox'?['○','×'][ans]:opts[ans];
+    const correctText=q.question_type==='ox'?['○','×'][q.correct_ans]:opts[q.correct_ans];
+    const fb=document.getElementById(`fb-${q.id}`);
+    fb.innerHTML=`<div class="q-fb ${isCorrect?'ok':'ng'}">${isCorrect?'✓ 正解！':'✗ 不正解。正解は「'+correctText+'」です。'}${q.explanation?`<br><span style="font-size:10px;opacity:.9">${q.explanation}</span>`:''}</div>`;
+    // 選択肢の色
+    document.querySelectorAll(`[id^="opt-${q.id}-"]`).forEach((el,j)=>{
+      if(j===q.correct_ans) el.classList.add('correct');
+      else if(j===ans&&!isCorrect) el.classList.add('wrong');
+    });
+    // ラジオを無効化
+    document.querySelectorAll(`input[name="q${q.id}"]`).forEach(r=>r.disabled=true);
+  });
+
+  const score=Math.round(correct/questions.length*100);
+  const passed=score>=70;
+  const comment=document.getElementById('comment-input')?.value||'';
+  const now=new Date().toISOString();
+
+  // Supabaseに保存
+  if(userId){
+    try {
+      await sb.from('quiz_results').insert({
+        user_id:userId,
+        content_id:contentId,
+        score,
+        passed,
+        comment,
+        taken_at:now
+      });
+      // 進捗も完了に更新
+      await sb.from('progress').upsert({
+        user_id:userId,
+        content_id:contentId,
+        status:'completed',
+        progress_pct:100,
+        completed_at:now
+      },{onConflict:'user_id,content_id'});
+    } catch(e){console.warn('結果保存エラー:',e);}
+  }
+
+  quizSubmitted=true;
+  document.getElementById('submit-btn').style.display='none';
+  showResult(score,passed,comment);
+  toast(passed?'🏆 合格おめでとうございます！':'📚 もう一度チャレンジしてみましょう');
+}
+
+function showResult(score,passed,comment){
+  const card=document.createElement('div');
+  card.className='result-card';
+  card.innerHTML=`
+    <div class="result-icon">${passed?'🏆':'📚'}</div>
+    <div class="result-score">${score}<span style="font-size:22px;font-weight:400">点</span></div>
+    <div class="result-label ${passed?'result-pass':'result-fail'}">${passed?'合格 ✓':'不合格'}</div>
+    <div class="result-sub">正答率 ${score}% ${passed?'/ 合格基準 70点以上':''}</div>
+    ${comment?`<div style="margin-top:12px;background:var(--bg);border-radius:7px;padding:10px;font-size:11px;color:var(--tx2);text-align:left"><strong>あなたのコメント：</strong><br>${comment}</div>`:''}
+    <button class="btn btn-p" style="margin-top:16px" onclick="history.back()">← 教材一覧に戻る</button>`;
+  document.getElementById('quiz-body').appendChild(card);
+  card.scrollIntoView({behavior:'smooth'});
+}
+
+// ── 初期化 ──
+loadContent();
+</script>
+</body>
+</html>

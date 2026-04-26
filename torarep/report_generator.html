@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>トラレポ - 記録簿出力</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+:root{--pr:#1a3a8c;--pr3:#2560cc;--tx:#1a2540;--tx2:#4a5e80;--tx3:#8a9bba;--bg:#f4f7fc;--wh:#fff;--bd:#d0daf0;--bd2:#e4ecfa;--gn:#1a7a42;--gnb:#eaf6ee;--rd:#c0392b;--r:10px;}
+body{font-family:'Meiryo','Yu Gothic',system-ui,sans-serif;background:var(--bg);color:var(--tx);font-size:13px;}
+.wrap{max-width:900px;margin:0 auto;padding:24px 16px;}
+.page-title{font-size:20px;font-weight:700;color:var(--pr);margin-bottom:6px;}
+.page-sub{font-size:12px;color:var(--tx2);margin-bottom:24px;}
+.card{background:var(--wh);border:1px solid var(--bd2);border-radius:var(--r);padding:20px;margin-bottom:16px;box-shadow:0 1px 4px rgba(26,58,140,0.05);}
+.ctit{font-size:13px;font-weight:700;color:var(--pr);margin-bottom:14px;}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px;}
+.form-group{display:flex;flex-direction:column;gap:4px;}
+.form-group label{font-size:10px;font-weight:700;color:var(--tx2);}
+.form-group select,.form-group input{background:var(--bg);border:1px solid var(--bd);color:var(--tx);padding:8px 10px;border-radius:6px;font-size:12px;font-family:inherit;width:100%;}
+.btn{padding:10px 20px;border-radius:7px;border:none;cursor:pointer;font-size:13px;font-weight:600;font-family:inherit;transition:.15s;}
+.btn-p{background:var(--pr);color:#fff;}.btn-p:hover{background:var(--pr3);}
+.btn-g{background:var(--wh);color:var(--pr);border:1px solid var(--bd);}.btn-g:hover{background:var(--bg);}
+.preview-wrap{margin-top:16px;}
+
+/* ── 印刷用スタイル ── */
+@media print {
+  body{background:#fff;}
+  .no-print{display:none!important;}
+  .wrap{max-width:100%;padding:0;}
+  .record-sheet{box-shadow:none;border:none;}
+}
+
+/* ── 記録簿デザイン（実際の書式に合わせる） ── */
+.record-sheet{
+  background:#fff;
+  border:2px solid #333;
+  font-family:'Meiryo','MS Gothic',sans-serif;
+  font-size:11px;
+  color:#000;
+  max-width:800px;
+  margin:0 auto;
+}
+.rs-title{
+  text-align:center;
+  font-size:18px;
+  font-weight:700;
+  padding:14px;
+  border-bottom:2px solid #333;
+  letter-spacing:.3em;
+}
+.rs-sub{
+  text-align:right;
+  font-size:9px;
+  padding:4px 10px;
+  border-bottom:1px solid #333;
+}
+.rs-header{
+  border-bottom:2px solid #333;
+}
+.rs-row{
+  display:flex;
+  border-bottom:1px solid #333;
+}
+.rs-cell{
+  padding:6px 10px;
+  border-right:1px solid #333;
+}
+.rs-cell:last-child{border-right:none;}
+.rs-label{font-weight:700;background:#f5f5f5;min-width:90px;}
+.rs-value{flex:1;}
+.rs-section-title{
+  background:#e8e8e8;
+  font-weight:700;
+  padding:6px 10px;
+  border-bottom:1px solid #333;
+  font-size:12px;
+}
+.rs-table{width:100%;border-collapse:collapse;}
+.rs-table th{
+  background:#d0d0d0;
+  padding:6px 8px;
+  border:1px solid #333;
+  font-size:10px;
+  text-align:center;
+  font-weight:700;
+}
+.rs-table td{
+  padding:5px 8px;
+  border:1px solid #aaa;
+  font-size:10px;
+  vertical-align:top;
+}
+.rs-table tr:nth-child(even) td{background:#fafafa;}
+.rs-score-100{color:#006400;font-weight:700;}
+.rs-score-80{color:#0000aa;}
+.rs-score-low{color:#cc0000;}
+.rs-remarks{
+  min-height:60px;
+  padding:8px 10px;
+  border-bottom:1px solid #333;
+}
+.rs-remarks-label{font-weight:700;margin-bottom:4px;}
+.rs-sign{
+  display:flex;
+  border-top:2px solid #333;
+}
+.rs-sign-cell{
+  flex:1;
+  padding:8px 10px;
+  border-right:1px solid #333;
+  min-height:50px;
+}
+.rs-sign-cell:last-child{border-right:none;}
+.rs-sign-label{font-size:9px;font-weight:700;margin-bottom:20px;}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <!-- コントロール -->
+  <div class="no-print">
+    <div class="page-title">📋 乗務員教育記録簿 出力</div>
+    <div class="page-sub">教材・期間を選択してPDF形式で出力できます</div>
+
+    <div class="card">
+      <div class="ctit">出力条件の設定</div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>教材（実施テーマ）</label>
+          <select id="sel-content"><option value="">読み込み中...</option></select>
+        </div>
+        <div class="form-group">
+          <label>営業所</label>
+          <select id="sel-branch"><option value="">全営業所</option></select>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>実施開始日</label>
+          <input type="date" id="date-from"/>
+        </div>
+        <div class="form-group">
+          <label>実施終了日</label>
+          <input type="date" id="date-to"/>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>会社名</label>
+          <input type="text" id="company-name" placeholder="株式会社○○運輸"/>
+        </div>
+        <div class="form-group">
+          <label>事業所名</label>
+          <input type="text" id="branch-name" placeholder="本社営業所"/>
+        </div>
+      </div>
+      <div class="form-group" style="margin-bottom:14px">
+        <label>実施者氏名</label>
+        <input type="text" id="instructor-name" placeholder="例：田中 管理者、山田 哲也"/>
+      </div>
+      <div style="display:flex;gap:10px">
+        <button class="btn btn-p" onclick="generateReport()">📋 記録簿を生成</button>
+        <button class="btn btn-g" onclick="window.print()">🖨️ 印刷・PDF保存</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 記録簿プレビュー -->
+  <div id="report-area"></div>
+
+</div>
+
+<script>
+const SUPABASE_URL = 'https://hnrprrbyvhquvvmuvufd.supabase.co';
+const SUPABASE_KEY = 'sb_publishable_UBIypHJZ0nwDSzl6s6xvFg_O9_YA3UG';
+const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+// 初期化
+async function init(){
+  // 今月の日付をデフォルト設定
+  const now=new Date();
+  const y=now.getFullYear(),m=String(now.getMonth()+1).padStart(2,'0');
+  document.getElementById('date-from').value=`${y}-${m}-01`;
+  document.getElementById('date-to').value=`${y}-${m}-${new Date(y,now.getMonth()+1,0).getDate()}`;
+
+  // URLパラメータから管理者情報を自動入力
+  const params=new URLSearchParams(location.search);
+  const adminName=decodeURIComponent(params.get('admin_name')||'');
+  const companyName=decodeURIComponent(params.get('company')||'');
+  const branchName=decodeURIComponent(params.get('branch')||'');
+  if(adminName) document.getElementById('instructor-name').value=adminName;
+  if(companyName) document.getElementById('company-name').value=companyName;
+  if(branchName) document.getElementById('branch-name').value=branchName;
+
+  // Supabaseからも管理者情報を取得（URLパラメータがない場合）
+  if(!adminName){
+    try {
+      const userId=params.get('user_id');
+      if(userId){
+        const {data:admin} = await sb.from('users').select('sei,mei,branch').eq('id',userId).single();
+        if(admin){
+          document.getElementById('instructor-name').value=admin.sei+' '+admin.mei;
+          if(!branchName) document.getElementById('branch-name').value=admin.branch;
+        }
+      }
+    } catch(e){}
+  }
+
+  // 会社名をlocalStorageから復元（システム設定と連動）
+  const savedCompany=localStorage.getItem('torarep_company');
+  const savedBranch=localStorage.getItem('torarep_branch');
+  if(savedCompany&&!companyName) document.getElementById('company-name').value=savedCompany;
+  if(savedBranch&&!branchName) document.getElementById('branch-name').value=savedBranch;
+
+  // 入力時にlocalStorageに保存
+  document.getElementById('company-name').addEventListener('change',function(){
+    localStorage.setItem('torarep_company',this.value);
+  });
+  document.getElementById('branch-name').addEventListener('change',function(){
+    localStorage.setItem('torarep_branch',this.value);
+  });
+
+  // 教材一覧取得
+  const {data:contents} = await sb.from('contents').select('id,title,category').eq('status','published');
+  const sel=document.getElementById('sel-content');
+  sel.innerHTML='<option value="">教材を選択してください</option>';
+  if(contents) contents.forEach(c=>{
+    sel.innerHTML+=`<option value="${c.id}">${c.title}</option>`;
+    // URLパラメータで教材が指定されていれば自動選択
+    if(params.get('content_id')===c.id) sel.value=c.id;
+  });
+
+  // 営業所一覧取得
+  const {data:users} = await sb.from('users').select('branch');
+  if(users){
+    const branches=[...new Set(users.map(u=>u.branch))].filter(Boolean);
+    const bsel=document.getElementById('sel-branch');
+    bsel.innerHTML='<option value="">全営業所</option>';
+    branches.forEach(b=>bsel.innerHTML+=`<option value="${b}">${b}</option>`);
+  }
+
+  // 教材が自動選択されていれば自動生成
+  if(params.get('content_id')) setTimeout(generateReport, 500);
+}
+
+async function generateReport(){
+  const contentId=document.getElementById('sel-content').value;
+  const branch=document.getElementById('sel-branch').value;
+  const dateFrom=document.getElementById('date-from').value;
+  const dateTo=document.getElementById('date-to').value;
+  const company=document.getElementById('company-name').value||'　';
+  const branchName=document.getElementById('branch-name').value||'　';
+  const instructor=document.getElementById('instructor-name').value||'　';
+
+  if(!contentId){alert('教材を選択してください');return;}
+
+  // 教材情報取得
+  const {data:content} = await sb.from('contents').select('*').eq('id',contentId).single();
+  if(!content){alert('教材データが取得できませんでした');return;}
+
+  // ユーザー取得
+  let userQuery=sb.from('users').select('*').eq('status','active').neq('role','admin');
+  if(branch) userQuery=userQuery.eq('branch',branch);
+  const {data:users} = await userQuery.order('sei');
+
+  // 進捗・テスト結果取得
+  const {data:results} = await sb.from('quiz_results').select('*').eq('content_id',contentId);
+  const {data:progress} = await sb.from('progress').select('*').eq('content_id',contentId);
+
+  // データをマージ
+  const reportData=(users||[]).map((u,i)=>{
+    const res=results?.find(r=>r.user_id===u.id);
+    const prog=progress?.find(p=>p.user_id===u.id);
+    const webDate=res?.taken_at?new Date(res.taken_at):null;
+    return {
+      no: i+1,
+      name: `${u.sei} ${u.mei}`,
+      taimen: '', // 対面受講日は空（手入力）
+      web: webDate?`${webDate.getMonth()+1}月${webDate.getDate()}日 ${String(webDate.getHours()).padStart(2,'0')}:${String(webDate.getMinutes()).padStart(2,'0')}`:'',
+      score: res?res.score:null,
+      passed: res?res.passed:null,
+      comment: res?.comment||''
+    };
+  });
+
+  // 記録簿HTML生成
+  const themeText = content.category+'_'+content.title;
+  const reportHtml = `
+    <div class="record-sheet">
+      <div class="rs-title">乗　務　員　教　育　記　録　簿</div>
+      <div class="rs-sub">3年保存</div>
+
+      <div class="rs-section-title">実　施　概　要</div>
+      <div class="rs-header">
+        <div class="rs-row">
+          <div class="rs-cell rs-label">会社名</div>
+          <div class="rs-cell rs-value" style="flex:2">${company}</div>
+          <div class="rs-cell rs-label">事業所名</div>
+          <div class="rs-cell rs-value">${branchName}</div>
+        </div>
+        <div class="rs-row">
+          <div class="rs-cell rs-label">実施年月日</div>
+          <div class="rs-cell rs-value" style="flex:3">${dateFrom.replace(/-/g,'/')} ～ ${dateTo.replace(/-/g,'/')}</div>
+        </div>
+        <div class="rs-row">
+          <div class="rs-cell rs-label">対面受講実施場所</div>
+          <div class="rs-cell rs-value"></div>
+          <div class="rs-cell rs-label">対面受講実施時間</div>
+          <div class="rs-cell rs-value"></div>
+        </div>
+        <div class="rs-row">
+          <div class="rs-cell rs-label">実施者氏名</div>
+          <div class="rs-cell rs-value" style="flex:3">${instructor}</div>
+        </div>
+        <div class="rs-row">
+          <div class="rs-cell rs-label">実施テーマ</div>
+          <div class="rs-cell rs-value" style="flex:3">${themeText}</div>
+        </div>
+      </div>
+
+      <div class="rs-section-title">受　講　者</div>
+      <table class="rs-table">
+        <thead>
+          <tr>
+            <th style="width:32px">No</th>
+            <th style="width:100px">氏　名</th>
+            <th style="width:80px">対面受講日</th>
+            <th style="width:130px">WEB受講完了日時</th>
+            <th style="width:55px">正答率</th>
+            <th>コメント</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${reportData.map(r=>{
+            const scoreClass=r.score===100?'rs-score-100':r.score>=80?'rs-score-80':r.score!==null?'rs-score-low':'';
+            return `<tr>
+              <td style="text-align:center">${r.no}</td>
+              <td>${r.name}</td>
+              <td style="text-align:center">${r.taimen}</td>
+              <td style="text-align:center">${r.web}</td>
+              <td style="text-align:center" class="${scoreClass}">${r.score!==null?r.score+'%':''}</td>
+              <td style="font-size:9px">${r.comment}</td>
+            </tr>`;
+          }).join('')}
+          ${Array(Math.max(0,20-reportData.length)).fill(0).map((_,i)=>`<tr><td style="text-align:center">${reportData.length+i+1}</td><td></td><td></td><td></td><td></td><td></td></tr>`).join('')}
+        </tbody>
+      </table>
+
+      <div class="rs-section-title" style="margin-top:0">教　育　指　導　の　内　容</div>
+      <div class="rs-remarks">
+        <div class="rs-remarks-label">■ 参加者意見・感想</div>
+        <div style="font-size:10px;color:#555;line-height:1.8">
+          ${reportData.filter(r=>r.comment).map(r=>`・${r.name}：${r.comment}`).join('<br>') || '　'}
+        </div>
+      </div>
+      <div class="rs-remarks">
+        <div class="rs-remarks-label">■ 実施者所見・備考</div>
+        <div style="min-height:40px"></div>
+      </div>
+
+      <div class="rs-sign">
+        <div class="rs-sign-cell"><div class="rs-sign-label">確認者</div></div>
+        <div class="rs-sign-cell"><div class="rs-sign-label">実施責任者</div></div>
+        <div class="rs-sign-cell"><div class="rs-sign-label">実施者</div></div>
+      </div>
+    </div>`;
+
+  document.getElementById('report-area').innerHTML=reportHtml;
+  document.getElementById('report-area').scrollIntoView({behavior:'smooth'});
+}
+
+init();
+</script>
+</body>
+</html>
