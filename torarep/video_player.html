@@ -43,18 +43,12 @@ body{font-family:'Meiryo','Yu Gothic',system-ui,sans-serif;background:var(--bg);
   .wrap{min-height:100vh;}
   .hdr{padding:0 24px;}
   .content{padding:20px 32px;}
-  /* PC：動画エリアを上部に固定 */
-  .video-wrap{
+  /* PC：動画+バーをまとめてstickyに */
+  .video-sticky{
     position:sticky;
     top:0;
     z-index:10;
-    max-height:60vh;
-    object-fit:contain;
-  }
-  .vprog-wrap{
-    position:sticky;
-    top:calc(60vw * 9/16);
-    z-index:10;
+    background:#000;
   }
 }
 
@@ -151,6 +145,12 @@ body{font-family:'Meiryo','Yu Gothic',system-ui,sans-serif;background:var(--bg);
 
 #toast{position:fixed;bottom:16px;left:50%;transform:translateX(-50%);background:var(--pr);color:#fff;padding:9px 18px;border-radius:8px;font-size:12px;font-weight:500;display:none;z-index:300;white-space:nowrap;}
 
+
+/* video+バーをまとめるコンテナ */
+.video-sticky{background:#000;}
+@media(min-width:601px){
+  .video-sticky{position:sticky;top:0;z-index:10;}
+}
 </style>
 </head>
 <body>
@@ -162,7 +162,8 @@ body{font-family:'Meiryo','Yu Gothic',system-ui,sans-serif;background:var(--bg);
     <button class="hdr-back" onclick="goBack()" style="background:rgba(255,255,255,0.15);border:none;color:#fff;border-radius:6px;padding:5px 12px;font-size:12px;cursor:pointer;font-family:inherit;flex-shrink:0">← 戻る</button>
   </div>
 
-  <!-- VIDEO -->
+  <!-- VIDEO + PROGRESS（まとめてsticky） -->
+  <div class="video-sticky">
   <div class="video-wrap" id="video-wrap">
     <video id="main-video" preload="metadata" playsinline
       onplay="onPlay()" onpause="onPause()" ontimeupdate="onTimeUpdate()" onended="onEnded()">
@@ -186,6 +187,7 @@ body{font-family:'Meiryo','Yu Gothic',system-ui,sans-serif;background:var(--bg);
     </div>
   </div>
 
+  </div><!-- /video-sticky -->
   <!-- CONTENT -->
   <div class="content">
 
