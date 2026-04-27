@@ -218,7 +218,7 @@ tr:last-child td{border-bottom:none;}tr:hover td{background:var(--bp);}tr.suspen
 #driver-screen{display:none;min-height:100vh;background:#f0f4f8;}
 .d-wrap{
   width:100%;
-  max-width:430px;
+  max-width:900px;
   margin:0 auto;
   min-height:100vh;
   min-height:100dvh;
@@ -227,24 +227,64 @@ tr:last-child td{border-bottom:none;}tr:hover td{background:var(--bp);}tr.suspen
   flex-direction:column;
   box-shadow:0 0 30px rgba(26,58,140,0.12);
   overflow-x:hidden;
-  position:relative;
 }
-/* スマホ：幅いっぱいに表示 */
-@media(max-width:430px){
-  .d-wrap{
-    max-width:100%;
-    box-shadow:none;
-  }
+/* スマホ：幅いっぱい・シャドウなし */
+@media(max-width:600px){
+  .d-wrap{max-width:100%;box-shadow:none;}
 }
-/* PC幅のときは画面中央に配置 */
-@media(min-width:431px){
+/* PC・タブレット：中央寄せ */
+@media(min-width:601px){
   #driver-screen{
     display:flex;
     align-items:flex-start;
     justify-content:center;
-    padding:0;
+    background:var(--bg);
+    min-height:100vh;
   }
   .d-wrap{min-height:100vh;}
+  /* ヘッダーをPC向けに */
+  .d-header{padding:0 32px;}
+  /* コンテンツエリアを2カラムに */
+  .d-pad{padding:20px 24px;}
+  /* 今月の教材を横広く */
+  #d-today{
+    grid-template-columns:repeat(4,1fr)!important;
+  }
+  /* 未受講・完了リストを2カラムに */
+  #d-unrec, #d-done, #d-lib{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:12px;
+  }
+  /* d-itemをカード型に */
+  .d-item{
+    flex-direction:column;
+    border-radius:10px;
+    border:1px solid var(--bd2);
+    overflow:hidden;
+    box-shadow:0 2px 8px rgba(26,58,140,0.07);
+  }
+  .d-item-thumb{
+    width:100%!important;
+    height:140px!important;
+  }
+  .d-item-info{padding:10px 12px;}
+  /* ボトムナビをPC向けに */
+  .d-nav{
+    position:sticky;
+    bottom:0;
+    border-top:2px solid var(--bd2);
+    max-width:900px;
+  }
+  .d-ni{padding:12px 0;}
+}
+@media(min-width:900px){
+  #d-unrec, #d-done, #d-lib{
+    grid-template-columns:1fr 1fr 1fr;
+  }
+  #d-today{
+    grid-template-columns:repeat(5,1fr)!important;
+  }
 }
 
 /* ── ドライバー ヘッダー ── */
@@ -352,6 +392,109 @@ tr:last-child td{border-bottom:none;}tr:hover td{background:var(--bp);}tr.suspen
 .qfb.ok{background:var(--gnb);border:1px solid #a8d8b8;color:var(--gn);}
 .qfb.ng{background:var(--rdb);border:1px solid #f0bab5;color:var(--rd);}
 .qresult{text-align:center;padding:24px 0;}
+
+/* ════════════════════════════════
+   管理者画面 レスポンシブ対応
+════════════════════════════════ */
+@media(max-width:768px){
+  /* サイドバーを非表示→ハンバーガーメニューに */
+  .sb{
+    position:fixed;
+    left:-240px;
+    top:0;bottom:0;
+    z-index:200;
+    transition:left .25s ease;
+    box-shadow:4px 0 20px rgba(0,0,0,0.3);
+  }
+  .sb.open{left:0;}
+  .sb-overlay{
+    display:none;
+    position:fixed;inset:0;
+    background:rgba(0,0,0,0.4);
+    z-index:199;
+  }
+  .sb-overlay.show{display:block;}
+
+  /* メインコンテンツを全幅に */
+  .main{margin-left:0!important;padding:12px;}
+
+  /* トップバーにハンバーガーボタン追加 */
+  .topbar{padding:0 12px;}
+  .ham-btn{display:none;
+    display:flex!important;
+    flex-direction:column;gap:5px;
+    background:none;border:none;cursor:pointer;padding:8px;
+  }
+  .ham-btn span{
+    display:block;width:22px;height:2px;
+    background:var(--pr);border-radius:2px;transition:.2s;
+  }
+
+  /* カード4列→2列→1列 */
+  .g4{grid-template-columns:1fr 1fr!important;}
+
+  /* テーブルをスクロール可能に */
+  .twrap{overflow-x:auto;-webkit-overflow-scrolling:touch;}
+  table{min-width:600px;}
+
+  /* ユーザー管理テーブルを縮小 */
+  .usr-table td, .usr-table th{padding:6px 8px;font-size:11px;}
+
+  /* レポートマトリクス */
+  .rep-table th, .rep-table td{padding:5px 7px;font-size:10px;}
+
+  /* モーダルを全画面に */
+  .modal{
+    width:100%!important;
+    max-width:100%!important;
+    margin:0!important;
+    border-radius:16px 16px 0 0!important;
+    max-height:90vh;
+    overflow-y:auto;
+  }
+  .overlay{align-items:flex-end!important;}
+
+  /* ページタイトルを小さく */
+  #pg-ttl{font-size:16px;}
+}
+
+@media(max-width:480px){
+  .g4{grid-template-columns:1fr 1fr!important;}
+  .g22{grid-template-columns:1fr!important;}
+  .main{padding:10px;}
+}
+
+/* ハンバーガーボタンはPCでは非表示 */
+.ham-btn{display:none;}
+
+@media(max-width:600px){
+  /* トップバーのボタンを小さく */
+  .tbr .btn{font-size:11px;padding:7px 10px;}
+  .tbr{gap:5px;}
+
+  /* ダッシュボードカードを2列 */
+  .g4{grid-template-columns:1fr 1fr!important;}
+
+  /* ユーザー管理：社員番号・役職列を非表示 */
+  .usr-table .hide-sp{display:none;}
+
+  /* スクロールヒント */
+  .twrap::after{
+    content:'← 横にスクロールできます';
+    display:block;
+    font-size:10px;
+    color:var(--tx3);
+    text-align:center;
+    padding:4px;
+  }
+}
+
+@media(max-width:400px){
+  .g4{grid-template-columns:1fr!important;}
+  .tbr .btn{font-size:10px;padding:6px 8px;}
+  .sc{padding:14px 10px;}
+}
+
 </style>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 </head>
@@ -395,10 +538,10 @@ tr:last-child td{border-bottom:none;}tr:hover td{background:var(--bp);}tr.suspen
     <div class="ns">メイン</div>
     <div class="ni on" onclick="ago('dash')"><span class="ni-ic">📊</span>ダッシュボード</div>
     <div class="ns">コンテンツ管理</div>
-    <div class="ni" onclick="ago('list')"><span class="ni-ic">📋</span>教材一覧</div>
+    <div class="ni" onclick="agoAndClose(\'list\')"><span class="ni-ic">📋</span>教材一覧</div>
     <div class="ns">管理</div>
-    <div class="ni" onclick="ago('users')"><span class="ni-ic">👥</span>ユーザー管理<span class="nbg" id="sus-badge">2</span></div>
-    <div class="ni" onclick="ago('report')"><span class="ni-ic">📈</span>レポート・帳票</div>
+    <div class="ni" onclick="agoAndClose(\'users\')"><span class="ni-ic">👥</span>ユーザー管理<span class="nbg" id="sus-badge">2</span></div>
+    <div class="ni" onclick="agoAndClose(\'report\')"><span class="ni-ic">📈</span>レポート・帳票</div>
     <div class="ni" onclick="openRecordSheet()" style="padding-left:26px"><span class="ni-ic">📋</span>教育記録簿出力</div>
   </div>
   
@@ -410,6 +553,9 @@ tr:last-child td{border-bottom:none;}tr:hover td{background:var(--bp);}tr.suspen
 </div>
 <div class="amn">
   <div class="topbar">
+    <button class="ham-btn" id="ham-btn" onclick="toggleSidebar()" aria-label="メニュー">
+      <span></span><span></span><span></span>
+    </button>
     <div class="pg-ttl" id="pg-ttl">ダッシュボード</div>
     <div class="tbr" id="tbr">
       <button class="btn bg2" onclick="ago('report')">📤 レポート出力</button>
@@ -602,7 +748,7 @@ tr:last-child td{border-bottom:none;}tr:hover td{background:var(--bp);}tr.suspen
       <select class="inp" id="usr-role" onchange="renderUsers()"><option value="">全役職</option><option>ドライバー</option><option>リーダー</option><option>管理者</option></select>
       <button class="btn bg2" onclick="document.getElementById('usr-q').value='';document.getElementById('usr-br').value='';document.getElementById('usr-role').value='';renderUsers()">リセット</button>
     </div>
-    <div class="twrap"><table><thead><tr><th><input type="checkbox" id="chk-all" onchange="toggleAll(this.checked)" style="accent-color:var(--pr)"/></th><th>名前</th><th>ログインID</th><th>社員番号</th><th>営業所</th><th>役職</th><th>受講進捗</th><th>最終ログイン</th><th>ステータス</th><th>操作</th></tr></thead><tbody id="user-tb"></tbody></table></div>
+    <div class="twrap"><table><thead><tr><th><input type="checkbox" id="chk-all" onchange="toggleAll(this.checked)" style="accent-color:var(--pr)"/></th><th>名前</th><th>ログインID</th><th class="hide-sp">社員番号</th><th>営業所</th><th class="hide-sp">役職</th><th>受講進捗</th><th>最終ログイン</th><th>ステータス</th><th>操作</th></tr></thead><tbody id="user-tb"></tbody></table></div>
     <div id="bulk-bar" style="display:none;margin-top:9px;padding:9px 12px;background:var(--bl);border:1px solid var(--bm);border-radius:7px;align-items:center;gap:9px">
       <span style="font-size:11px;color:var(--pr);font-weight:600" id="bulk-cnt">0件選択中</span>
       <button class="btn bsm bgn" onclick="bulkAct()">✓ 一括アクティブ</button>
@@ -738,6 +884,7 @@ tr:last-child td{border-bottom:none;}tr:hover td{background:var(--bp);}tr.suspen
 </div>
 
 <!-- ═ MODALS ═ -->
+<div class="sb-overlay" id="sb-overlay" onclick="toggleSidebar()"></div>
 <div class="overlay hidden" id="modal-reg">
   <div class="modal">
     <div class="mhead"><div class="mttl" id="reg-ttl">👤 新規ドライバー登録</div><button class="mclose" onclick="closeModal('modal-reg')">×</button></div>
@@ -1968,6 +2115,27 @@ async function submitAddContent(){
   } catch(e){
     toast2('⚠️ 保存に失敗しました','var(--rd)');
     console.error(e);
+  }
+}
+
+
+function toggleSidebar(){
+  const sb = document.querySelector('.sb');
+  const overlay = document.getElementById('sb-overlay');
+  if(sb){
+    sb.classList.toggle('open');
+    overlay.classList.toggle('show');
+  }
+}
+
+// メニュークリック時にサイドバーを閉じる（スマホ）
+function agoAndClose(id){
+  ago(id);
+  const sb = document.querySelector('.sb');
+  const overlay = document.getElementById('sb-overlay');
+  if(sb && window.innerWidth <= 768){
+    sb.classList.remove('open');
+    overlay.classList.remove('show');
   }
 }
 
