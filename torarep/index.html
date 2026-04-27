@@ -523,6 +523,7 @@ tr:last-child td{border-bottom:none;}tr:hover td{background:var(--bp);}tr.suspen
   .ham-btn{display:flex;}
 }
 
+@media(max-width:768px){.sp-only{display:block!important;}}
 </style>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 </head>
@@ -805,7 +806,7 @@ tr:last-child td{border-bottom:none;}tr:hover td{background:var(--bp);}tr.suspen
       <div class="sc3"><div class="sl">未受講</div><div class="sv" id="rep-none" style="color:var(--rd)">—</div></div>
     </div>
     <div style="overflow-x:auto">
-      <div id="rep-matrix-wrap">
+      <div style="font-size:11px;color:var(--tx3);margin-bottom:6px;display:none" id="scroll-hint" class="sp-only">← 横にスクロールして全体を確認できます</div><div id="rep-matrix-wrap">
         <div style="text-align:center;padding:32px;color:var(--tx3)">読み込み中...</div>
       </div>
     </div>
@@ -1506,19 +1507,55 @@ async function initList(){
       tb.innerHTML='<tr><td colspan="6" style="text-align:center;padding:20px;color:var(--tx3)">教材がまだ登録されていません<br><button class="btn bp bsm" style="margin-top:8px" onclick="showAddContentModal()">➕ 最初の教材を追加</button></td></tr>';
       return;
     }
-    tb.innerHTML=contents.map(c=>`<tr>
-      <td><div style="display:flex;align-items:center;gap:7px">
-        <div style="width:32px;height:21px;border-radius:3px;background:${c.thumb_color||'#1a3a8c'};flex-shrink:0"></div>
-        <strong style="color:var(--pr)">${c.title}</strong>
-      </div></td>
-      <td>${c.category}</td>
-      <td style="text-align:center">${c.video_url?'✓':'—'}</td>
-      <td><span class="pill ${c.status==='published'?'pg':c.status==='draft'?'pa':'pr2'}">${c.status==='published'?'公開中':c.status==='draft'?'下書き':'終了'}</span></td>
-      <td><div style="display:flex;gap:3px">
-        <button class="btn bg2 bsm" onclick="editContent('${c.id}','${c.title}','${(c.video_url||'')}','${c.category}','${c.thumb_color||'#1a3a8c'}')">✏️ 編集</button>
-        <button class="btn bsm bdng" onclick="deleteContent('${c.id}','${c.title.replace(/'/g,'')}')">🗑 削除</button>
-      </div></td>
-    </tr>`).join('');
+    // スマホではカード形式、PCではテーブル形式
+    const isMobile = window.innerWidth <= 768;
+    if(isMobile){
+      // カード形式
+      document.getElementById('list-tb').closest('table').style.display='none';
+      let cardContainer = document.getElementById('list-cards');
+      if(!cardContainer){
+        cardContainer = document.createElement('div');
+        cardContainer.id = 'list-cards';
+        document.getElementById('list-tb').closest('table').parentNode.appendChild(cardContainer);
+      }
+      cardContainer.style.display='block';
+      cardContainer.innerHTML = contents.map(c=>`
+        <div style="background:var(--wh);border:1px solid var(--bd2);border-radius:10px;padding:14px;margin-bottom:10px;display:flex;gap:12px;align-items:center">
+          <div style="width:48px;height:48px;border-radius:8px;background:${c.thumb_color||'#1a3a8c'};flex-shrink:0;display:flex;align-items:center;justify-content:center">
+            ${c.video_url?'<span style="color:#fff;font-size:18px">▶</span>':'<span style="color:rgba(255,255,255,0.5);font-size:14px">—</span>'}
+          </div>
+          <div style="flex:1;min-width:0">
+            <div style="font-size:13px;font-weight:700;color:var(--pr);margin-bottom:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${c.title}</div>
+            <div style="font-size:11px;color:var(--tx2);margin-bottom:6px">${c.category}</div>
+            <div style="display:flex;align-items:center;gap:8px">
+              <span class="pill ${c.status==='published'?'pg':c.status==='draft'?'pa':'pr2'}" style="font-size:10px">${c.status==='published'?'公開中':c.status==='draft'?'下書き':'終了'}</span>
+              <div style="display:flex;gap:5px;margin-left:auto">
+                <button class="btn bg2 bsm" onclick="editContent('${c.id}','${c.title}','${(c.video_url||'')}','${c.category}','${c.thumb_color||'#1a3a8c'}')">✏️</button>
+                <button class="btn bsm bdng" onclick="deleteContent('${c.id}','${c.title.replace(/'/g,'')}')">🗑</button>
+              </div>
+            </div>
+          </div>
+        </div>`).join('');
+    } else {
+      // テーブル形式（PC）
+      const tableEl = document.getElementById('list-tb').closest('table');
+      tableEl.style.display='';
+      const cardContainer = document.getElementById('list-cards');
+      if(cardContainer) cardContainer.style.display='none';
+      tb.innerHTML=contents.map(c=>`<tr>
+        <td><div style="display:flex;align-items:center;gap:7px">
+          <div style="width:32px;height:21px;border-radius:3px;background:${c.thumb_color||'#1a3a8c'};flex-shrink:0"></div>
+          <strong style="color:var(--pr)">${c.title}</strong>
+        </div></td>
+        <td>${c.category}</td>
+        <td style="text-align:center">${c.video_url?'✓':'—'}</td>
+        <td><span class="pill ${c.status==='published'?'pg':c.status==='draft'?'pa':'pr2'}">${c.status==='published'?'公開中':c.status==='draft'?'下書き':'終了'}</span></td>
+        <td><div style="display:flex;gap:3px">
+          <button class="btn bg2 bsm" onclick="editContent('${c.id}','${c.title}','${(c.video_url||'')}','${c.category}','${c.thumb_color||'#1a3a8c'}')">✏️ 編集</button>
+          <button class="btn bsm bdng" onclick="deleteContent('${c.id}','${c.title.replace(/'/g,'')}')">🗑 削除</button>
+        </div></td>
+      </tr>`).join('');
+    }
   } catch(e){
     tb.innerHTML='<tr><td colspan="6" style="text-align:center;padding:20px;color:var(--rd)">読み込みエラー: '+e.message+'</td></tr>';
   }
