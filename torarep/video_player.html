@@ -64,11 +64,7 @@ body{font-family:'Meiryo','Yu Gothic',system-ui,sans-serif;background:var(--bg);
 .play-btn{width:60px;height:60px;background:rgba(255,255,255,0.9);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:24px;}
 
 /* ── PROGRESS BAR ── */
-.vprog-wrap{background:#1a1a2e;padding:8px 14px;flex-shrink:0;}
-.vprog-bar{background:#333;border-radius:3px;height:4px;cursor:pointer;position:relative;}
-.vprog-fill{height:4px;border-radius:3px;background:var(--pr3);transition:width .1s;}
-.vprog-info{display:flex;justify-content:space-between;margin-top:5px;font-size:10px;color:#aaa;}
-.vprog-watched{color:var(--ac);font-weight:600;}
+
 
 /* ── CONTENT ── */
 .content{flex:1;overflow-y:auto;padding:16px;}
@@ -146,8 +142,8 @@ body{font-family:'Meiryo','Yu Gothic',system-ui,sans-serif;background:var(--bg);
 #toast{position:fixed;bottom:16px;left:50%;transform:translateX(-50%);background:var(--pr);color:#fff;padding:9px 18px;border-radius:8px;font-size:12px;font-weight:500;display:none;z-index:300;white-space:nowrap;}
 
 
-/* video+バーをまとめるコンテナ */
-.video-sticky{background:#000;}
+/* video コンテナ */
+.video-sticky{}
 @media(min-width:601px){
   .video-sticky{position:sticky;top:0;z-index:10;}
 }
@@ -281,10 +277,10 @@ function onTimeUpdate(){
   const v=document.getElementById('main-video');
   if(!v.duration) return;
   const pct=Math.round(v.currentTime/v.duration*100);
-  document.getElementById('vprog-fill').style.width=pct+'%';
-  document.getElementById('time-current').textContent=fmtTime(v.currentTime);
-  document.getElementById('time-total').textContent=fmtTime(v.duration);
-  document.getElementById('watch-pct').textContent=pct+'% 視聴済み';
+
+
+
+
 
   watchPct=Math.max(watchPct,pct);
 
@@ -417,9 +413,6 @@ function manualUnlock(){
   // 完了ボタンを非表示
   const cbw=document.getElementById('complete-btn-wrap');
   if(cbw) cbw.style.display='none';
-  const ws=document.getElementById('watch-status');
-  ws.className='watch-status done';
-  ws.innerHTML='<div class="ws-icon">✅</div><div class="ws-text"><div class="ws-title">視聴完了！下のテストに回答してください</div></div>';
   renderQuiz();
   // テストカードまでスクロール
   setTimeout(()=>{
