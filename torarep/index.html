@@ -1686,11 +1686,11 @@ function getYoutubeThumbnail(videoUrl){
 }
 
 function openVideo(contentId){
-  // 動画プレイヤーページへ遷移（同じフォルダのvideo_player.htmlを開く）
   const name=encodeURIComponent((currentUser.sei||'')+(currentUser.mei||''));
   const uid=currentUser.id||'';
-  const url=`video_player.html?content_id=${contentId}&user_id=${uid}&name=${name}`;
-  window.open(url,'_blank');
+  const ref=encodeURIComponent(location.href);
+  const url='video_player.html?content_id='+contentId+'&user_id='+uid+'&name='+name+'&ref='+ref;
+  location.href=url; // 同じタブで開く（戻るボタンが効くように）
 }
 
 // Supabaseから教材を読み込んでドライバー画面を初期化
