@@ -191,27 +191,18 @@ body{font-family:'Meiryo','Yu Gothic',system-ui,sans-serif;background:var(--bg);
   <!-- CONTENT -->
   <div class="content">
 
-    <!-- 視聴ステータス -->
-    <div class="watch-status not-started" id="watch-status">
-      <div class="ws-icon">🎬</div>
-      <div class="ws-text">
-        <div class="ws-title" id="ws-title">動画を視聴してください</div>
-        <div class="ws-sub" id="ws-sub">視聴後「✓ 視聴完了」ボタンを押してください</div>
-      </div>
-      <div class="ws-pct" id="ws-pct">0%</div>
-    </div>
-
-    <!-- 視聴完了ボタン（常に表示） -->
-    <div id="complete-btn-wrap" style="padding:12px 0 0 0;">
+    <!-- 視聴完了ボタン -->
+    <div id="complete-btn-wrap" style="padding:14px 0 0 0;">
       <button id="complete-btn" onclick="manualUnlock()" style="
-        width:100%;padding:14px;border-radius:8px;border:none;
+        width:100%;padding:16px;border-radius:8px;border:none;
         background:#e8c020;color:#1a2540;
         font-size:15px;font-weight:700;font-family:inherit;
-        cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;">
-        ✓ 視聴完了 → テストに進む
+        cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;
+        box-shadow:0 2px 8px rgba(232,192,32,0.4);">
+        ✓ 動画を見終わったらここをタップ
       </button>
-      <div style="text-align:center;font-size:10px;color:var(--tx3);margin-top:6px">
-        動画を最後まで視聴してからボタンを押してください
+      <div style="text-align:center;font-size:11px;color:var(--tx3);margin-top:6px">
+        テストが解放されます
       </div>
     </div>
 
@@ -294,23 +285,11 @@ function onTimeUpdate(){
   document.getElementById('time-current').textContent=fmtTime(v.currentTime);
   document.getElementById('time-total').textContent=fmtTime(v.duration);
   document.getElementById('watch-pct').textContent=pct+'% 視聴済み';
-  document.getElementById('ws-pct').textContent=pct+'%';
+
   watchPct=Math.max(watchPct,pct);
 
-  // ステータス更新
-  const ws=document.getElementById('watch-status');
-  const wsTitle=document.getElementById('ws-title');
-  const wsSub=document.getElementById('ws-sub');
-  if(pct>=95){
-    ws.className='watch-status done';
-    wsTitle.textContent='✓ 視聴完了！';
-    wsSub.textContent='テストに挑戦してください';
-    if(!quizUnlocked){quizUnlocked=true;renderQuiz();}
-  } else if(pct>0){
-    ws.className='watch-status watching';
-    wsTitle.textContent='▶ 視聴中...';
-    wsSub.textContent=`あと${95-pct}%でテストが解放されます`;
-  }
+  // 95%以上で自動解放
+  if(pct>=95 && !quizUnlocked){quizUnlocked=true;renderQuiz();}
 }
 function onEnded(){
   onPause();
@@ -346,10 +325,13 @@ async function loadContent(){
     quizData=content.quiz_questions||[];
 
     // UI更新
-    document.getElementById('hdr-ttl').textContent=content.title;
-    document.getElementById('content-title').textContent=content.title;
+    document.getElementById('hdr-ttl').textContent=content.title||'教材';
+    document.getElementById('content-title').textContent=content.title||'';
     document.getElementById('content-desc').textContent=content.description||'';
-    document.getElementById('content-tags').innerHTML=(content.tags||[]).map(t=>`<span class="tag">${t}</span>`).join('');
+    // tagsはarray型かstring型か確認してから処理
+    const tags = Array.isArray(content.tags) ? content.tags :
+                 (typeof content.tags === 'string' ? JSON.parse(content.tags||'[]') : []);
+    document.getElementById('content-tags').innerHTML=tags.map(t=>`<span class="tag">${t}</span>`).join('');
 
     // 動画URL設定
     if(content.video_url){
@@ -378,6 +360,9 @@ async function loadContent(){
       const {data:result} = await sb.from('quiz_results').select('*').eq('user_id',userId).eq('content_id',contentId).order('taken_at',{ascending:false}).limit(1);
       if(result&&result.length>0){
         quizSubmitted=true;
+        // 完了済みなら視聴完了ボタンを非表示
+        const cbw=document.getElementById('complete-btn-wrap');
+        if(cbw) cbw.style.display='none';
         showResult(result[0].score,result[0].passed,result[0].comment||'');
       }
     }
