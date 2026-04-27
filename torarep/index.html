@@ -573,10 +573,7 @@ tr:last-child td{border-bottom:none;}tr:hover td{background:var(--bp);}tr.suspen
         <div class="tab" id="tab-act" onclick="swTab('act')">アクティブ <span id="cnt-act" style="background:var(--gnb);color:var(--gn);padding:1px 5px;border-radius:6px;font-size:9px;font-weight:700">0</span></div>
         <div class="tab" id="tab-sus" onclick="swTab('sus')">休止中 <span id="cnt-sus" style="background:var(--gyb);color:var(--gy);padding:1px 5px;border-radius:6px;font-size:9px;font-weight:700">0</span></div>
       </div>
-      <div style="display:flex;gap:7px">
-        <button class="btn bg2" onclick="openModal('modal-imp')">📥 CSV一括登録</button>
-        <button class="btn bp" onclick="openReg()">➕ 新規登録</button>
-      </div>
+
     </div>
     <div class="sbar">
       <input type="text" id="usr-q" placeholder="名前・ログインID・社員番号で検索..." oninput="renderUsers()"/>
@@ -1245,7 +1242,8 @@ async function initList(){
       <td style="text-align:center">${c.video_url?'✓':'—'}</td>
       <td><span class="pill ${c.status==='published'?'pg':c.status==='draft'?'pa':'pr2'}">${c.status==='published'?'公開中':c.status==='draft'?'下書き':'終了'}</span></td>
       <td><div style="display:flex;gap:3px">
-        <button class="btn bg2 bsm" onclick="deleteContent('${c.id}','${c.title.replace(/'/g,'')}')">🗑 削除</button>
+        <button class="btn bg2 bsm" onclick="editContent('${c.id}','${c.title}','${(c.video_url||'')}','${c.category}','${c.thumb_color||'#1a3a8c'}')">✏️ 編集</button>
+        <button class="btn bsm bdng" onclick="deleteContent('${c.id}','${c.title.replace(/'/g,'')}')">🗑 削除</button>
       </div></td>
     </tr>`).join('');
   } catch(e){
