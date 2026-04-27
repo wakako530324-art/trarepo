@@ -1221,6 +1221,8 @@ function clearErr(){
 
 function routeByRole(){
   if(!currentUser){showScreen('login');return;}
+  // ログイン状態をlocalStorageに保存
+  try { localStorage.setItem('torarep_session', JSON.stringify(currentUser)); } catch(e){}
   // スマホのズームをリセット
   const mv=document.querySelector('meta[name="viewport"]');
   if(mv){
