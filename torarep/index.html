@@ -227,12 +227,19 @@ tr:last-child td{border-bottom:none;}tr:hover td{background:var(--bp);}tr.suspen
   flex-direction:column;
   box-shadow:0 0 30px rgba(26,58,140,0.12);
   overflow-x:hidden;
+  position:relative;
 }
 /* スマホ：幅いっぱいに表示 */
 @media(max-width:430px){
   .d-wrap{
     max-width:100%;
     box-shadow:none;
+  }
+  #driver-screen{
+    position:fixed;
+    top:0;left:0;right:0;bottom:0;
+    overflow-y:auto;
+    -webkit-overflow-scrolling:touch;
   }
 }
 /* PC幅のときは画面中央に配置 */
@@ -965,8 +972,18 @@ function showScreen(name){
     ls.style.background='linear-gradient(135deg,#1a3a8c 0%,#2560cc 100%)';
     ls.style.padding='20px';
   }
-  if(name==='admin')  document.getElementById('admin-screen').style.display='block';
-  if(name==='driver') document.getElementById('driver-screen').style.display='flex';
+  if(name==='admin') document.getElementById('admin-screen').style.display='block';
+  if(name==='driver'){
+    var ds=document.getElementById('driver-screen');
+    ds.style.display='flex';
+    ds.style.flexDirection='column';
+    ds.style.minHeight='100vh';
+    // スクロールをトップに戻す
+    window.scrollTo(0,0);
+    document.documentElement.scrollTop=0;
+    document.body.scrollTop=0;
+    setTimeout(function(){window.scrollTo(0,0);},100);
+  }
 }
 
 async function doLogin(){
