@@ -786,34 +786,56 @@ tr:last-child td{border-bottom:none;}tr:hover td{background:var(--bp);}tr.suspen
 
 
 <div class="overlay hidden" id="modal-add-content">
-  <div class="modal" style="max-width:460px">
-    <div class="mhead"><div class="mttl">➕ 教材を追加</div><button class="mclose" onclick="closeModal('modal-add-content')">×</button></div>
-    <div class="mbody">
-      <div class="frow"><label>教材タイトル *</label><input id="add-ttl" placeholder="例：項目08 危険の予測及び回避..."/></div>
-      <div class="frow"><label>🎬 YouTube動画URL *</label>
-        <input id="add-url" placeholder="https://youtu.be/xxxxx"/>
-        <div style="font-size:10px;color:var(--tx3);margin-top:3px">YouTubeで「限定公開」にした動画のURLを貼り付けてください</div>
+  <div class="modal" style="max-width:520px;max-height:90vh;overflow-y:auto">
+    <div class="mhead">
+      <div class="mttl" id="add-modal-title">➕ 教材を追加（STEP1：基本情報）</div>
+      <button class="mclose" onclick="closeModal('modal-add-content')">×</button>
+    </div>
+
+    <!-- STEP1：基本情報 -->
+    <div id="add-step1">
+      <div class="mbody">
+        <div class="frow"><label>教材タイトル *</label><input id="add-ttl" placeholder="例：項目08 危険の予測及び回避..."/></div>
+        <div class="frow"><label>🎬 YouTube動画URL *</label>
+          <input id="add-url" placeholder="https://youtu.be/xxxxx"/>
+          <div style="font-size:10px;color:var(--tx3);margin-top:3px">YouTubeで「限定公開」にした動画のURLを貼り付けてください</div>
+        </div>
+        <div class="frow"><label>カテゴリ</label>
+          <select id="add-cat">
+            <option>法規・法定12項目</option>
+            <option>安全運転</option>
+            <option>緊急対応</option>
+            <option>エコドライブ</option>
+            <option>KYT</option>
+            <option>自社教材</option>
+          </select>
+        </div>
+        <div class="frow"><label>サムネイル背景色</label>
+          <input type="color" id="add-color" value="#1a3a8c" style="height:36px;padding:2px;cursor:pointer;width:100%;border-radius:5px;border:1px solid var(--bd)"/>
+        </div>
       </div>
-      <div class="frow"><label>カテゴリ</label>
-        <select id="add-cat">
-          <option>法規・法定12項目</option>
-          <option>安全運転</option>
-          <option>緊急対応</option>
-          <option>エコドライブ</option>
-          <option>KYT</option>
-          <option>自社教材</option>
-        </select>
-      </div>
-      <div class="frow"><label>サムネイル背景色</label>
-        <input type="color" id="add-color" value="#1a3a8c" style="height:36px;padding:2px;cursor:pointer;width:100%;border-radius:5px;border:1px solid var(--bd)"/>
-      </div>
-      <div style="background:var(--bl);border-radius:7px;padding:10px;font-size:11px;color:var(--tx2)">
-        💡 追加した教材はすぐにドライバー画面に表示されます
+      <div class="mfoot">
+        <button class="btn bg2" onclick="closeModal('modal-add-content')">キャンセル</button>
+        <button class="btn bp" onclick="goAddStep2()">次へ → テスト問題を作成</button>
       </div>
     </div>
-    <div class="mfoot">
-      <button class="btn bg2" onclick="closeModal('modal-add-content')">キャンセル</button>
-      <button class="btn bp" onclick="submitAddContent()">✅ 追加する</button>
+
+    <!-- STEP2：テスト問題 -->
+    <div id="add-step2" style="display:none">
+      <div class="mbody">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
+          <div style="font-size:12px;color:var(--tx2)">テスト問題を追加してください（任意・後から追加も可能）</div>
+          <button class="btn bp bsm" onclick="addQuestion()">＋ 問題を追加</button>
+        </div>
+        <div id="quiz-builder"></div>
+        <div style="background:var(--bl);border-radius:7px;padding:10px;font-size:11px;color:var(--tx2);margin-top:12px">
+          💡 問題を追加しなくても公開できます。後から問題を追加することもできます。
+        </div>
+      </div>
+      <div class="mfoot">
+        <button class="btn bg2" onclick="backToStep1()">← 戻る</button>
+        <button class="btn bp" onclick="submitAddContent()">🚀 公開する</button>
+      </div>
     </div>
   </div>
 </div>
@@ -1716,12 +1738,112 @@ async function submitEditContent(){
   }
 }
 
+
+// ── テスト問題ビルダー ──
+let addQuestions = [];
+
+function goAddStep2(){
+  const title = document.getElementById('add-ttl').value.trim();
+  const url = document.getElementById('add-url').value.trim();
+  if(!title){ toast2('⚠️ タイトルを入力してください','var(--rd)'); return; }
+  if(!url){ toast2('⚠️ YouTube URLを入力してください','var(--rd)'); return; }
+  document.getElementById('add-step1').style.display='none';
+  document.getElementById('add-step2').style.display='block';
+  document.getElementById('add-modal-title').textContent='➕ 教材を追加（STEP2：テスト問題）';
+  addQuestions = [];
+  document.getElementById('quiz-builder').innerHTML='<div style="text-align:center;padding:20px;color:var(--tx3);font-size:12px">「＋ 問題を追加」ボタンで問題を追加してください</div>';
+}
+
+function backToStep1(){
+  document.getElementById('add-step1').style.display='block';
+  document.getElementById('add-step2').style.display='none';
+  document.getElementById('add-modal-title').textContent='➕ 教材を追加（STEP1：基本情報）';
+}
+
+function addQuestion(){
+  const qno = addQuestions.length + 1;
+  const qid = 'q_' + qno;
+  addQuestions.push({id: qid, type:'choice', text:'', options:['','','',''], correct:0, explanation:''});
+  renderQuizBuilder();
+}
+
+function removeQuestion(qid){
+  addQuestions = addQuestions.filter(q => q.id !== qid);
+  renderQuizBuilder();
+}
+
+function renderQuizBuilder(){
+  const container = document.getElementById('quiz-builder');
+  if(addQuestions.length === 0){
+    container.innerHTML='<div style="text-align:center;padding:20px;color:var(--tx3);font-size:12px">「＋ 問題を追加」ボタンで問題を追加してください</div>';
+    return;
+  }
+  container.innerHTML = addQuestions.map((q,i) => `
+    <div style="background:var(--bg);border:1px solid var(--bd);border-radius:8px;padding:14px;margin-bottom:12px">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+        <div style="font-size:12px;font-weight:700;color:var(--pr)">問題 ${i+1}</div>
+        <div style="display:flex;gap:8px;align-items:center">
+          <select onchange="changeQType('${q.id}',this.value)" style="font-size:11px;padding:4px 8px;border-radius:5px;border:1px solid var(--bd);background:var(--wh)">
+            <option value="choice" ${q.type==='choice'?'selected':''}>4択</option>
+            <option value="ox" ${q.type==='ox'?'selected':''}>○×</option>
+          </select>
+          <button onclick="removeQuestion('${q.id}')" style="background:var(--rdb);border:1px solid #f0bab5;color:var(--rd);border-radius:5px;padding:3px 8px;font-size:11px;cursor:pointer">削除</button>
+        </div>
+      </div>
+      <div class="frow" style="margin-bottom:8px">
+        <label style="font-size:10px">問題文 *</label>
+        <textarea onchange="updateQ('${q.id}','text',this.value)" placeholder="問題文を入力してください" style="width:100%;background:var(--wh);border:1px solid var(--bd);border-radius:6px;padding:8px;font-size:12px;font-family:inherit;min-height:60px;resize:vertical">${q.text}</textarea>
+      </div>
+      ${q.type==='ox' ? `
+        <div style="font-size:11px;color:var(--tx2);margin-bottom:8px">正解を選択：
+          <label style="margin-right:12px"><input type="radio" name="correct_${q.id}" value="0" ${q.correct===0?'checked':''} onchange="updateQ('${q.id}','correct',0)"/> ○ が正解</label>
+          <label><input type="radio" name="correct_${q.id}" value="1" ${q.correct===1?'checked':''} onchange="updateQ('${q.id}','correct',1)"/> × が正解</label>
+        </div>
+      ` : `
+        <div style="margin-bottom:8px">
+          ${q.options.map((opt,j) => `
+            <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">
+              <input type="radio" name="correct_${q.id}" value="${j}" ${q.correct===j?'checked':''} onchange="updateQ('${q.id}','correct',${j})" title="これが正解"/>
+              <input value="${opt}" placeholder="選択肢${j+1}" onchange="updateOpt('${q.id}',${j},this.value)" style="flex:1;background:var(--wh);border:1px solid var(--bd);border-radius:5px;padding:6px 8px;font-size:12px;font-family:inherit"/>
+              ${q.correct===j ? '<span style="font-size:10px;color:var(--gn);font-weight:700">✓正解</span>' : ''}
+            </div>
+          `).join('')}
+          <div style="font-size:10px;color:var(--tx3)">正解にしたい選択肢の左のボタンを選択してください</div>
+        </div>
+      `}
+      <div class="frow">
+        <label style="font-size:10px">解説（任意）</label>
+        <input value="${q.explanation}" placeholder="正解の解説を入力（任意）" onchange="updateQ('${q.id}','explanation',this.value)" style="width:100%;background:var(--wh);border:1px solid var(--bd);border-radius:5px;padding:6px 8px;font-size:12px;font-family:inherit"/>
+      </div>
+    </div>
+  `).join('');
+}
+
+function changeQType(qid, type){
+  const q = addQuestions.find(q=>q.id===qid);
+  if(q){ q.type=type; q.correct=0; renderQuizBuilder(); }
+}
+
+function updateQ(qid, field, value){
+  const q = addQuestions.find(q=>q.id===qid);
+  if(q){ q[field] = field==='correct' ? parseInt(value) : value; }
+}
+
+function updateOpt(qid, idx, value){
+  const q = addQuestions.find(q=>q.id===qid);
+  if(q){ q.options[idx] = value; }
+}
+
 function showAddContentModal(){
   openModal('modal-add-content');
   document.getElementById('add-ttl').value='';
   document.getElementById('add-url').value='';
   document.getElementById('add-cat').value='法規・法定12項目';
   document.getElementById('add-color').value='#1a3a8c';
+  document.getElementById('add-step1').style.display='block';
+  document.getElementById('add-step2').style.display='none';
+  document.getElementById('add-modal-title').textContent='➕ 教材を追加（STEP1：基本情報）';
+  addQuestions=[];
 }
 
 async function submitAddContent(){
